@@ -98,7 +98,7 @@
             ['name' => 'Outstanding Fees', 'route' => 'fees.outstanding.index', 'icon' => 'exclamation-triangle'],
             ['name' => 'Scholarships', 'route' => 'fees.scholarships.index', 'icon' => 'award'],
             ['name' => 'Scholarship Applications', 'route' => 'fees.scholarship-applications.index', 'icon' => 'file-earmark-check'],
-            ['name' => 'Fee Reports', 'route' => 'reports.attendance', 'icon' => 'graph-up'],
+            ['name' => 'Fee Reports', 'route' => 'fees.reports', 'icon' => 'graph-up'],
             
             // View Only Section
             ['name' => 'Holidays', 'route' => 'academic.holidays.index', 'icon' => 'calendar-event'],
@@ -107,7 +107,7 @@
             ['name' => 'Dashboard', 'route' => 'dashboard.accounts_staff', 'icon' => 'speedometer2'],
             ['name' => 'Fee Collection', 'route' => 'fees.payments.index', 'icon' => 'cash-stack'],
             ['name' => 'Outstanding Fees', 'route' => 'fees.outstanding.index', 'icon' => 'exclamation-triangle'],
-            ['name' => 'Reports', 'route' => 'reports.attendance', 'icon' => 'graph-up'],
+            ['name' => 'Reports', 'route' => 'fees.reports', 'icon' => 'graph-up'],
             
             // View Only Section
             ['name' => 'Holidays', 'route' => 'academic.holidays.index', 'icon' => 'calendar-event'],
