@@ -138,6 +138,8 @@ class StaffController extends Controller
         // Update password only if provided
         if ($request->filled('password')) {
             $userData['password'] = Hash::make($validated['password']);
+            $userData['temp_password'] = $validated['password']; // Update for admin view
+            $userData['password_generated_at'] = now();
         }
 
         $staff->user->update($userData);

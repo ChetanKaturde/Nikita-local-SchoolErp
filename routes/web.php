@@ -341,6 +341,9 @@ Route::middleware(['auth', 'role:admin|principal|office|teacher|accountant'])->p
     // Outstanding Fees
     Route::get('outstanding', [\App\Http\Controllers\Web\FeeOutstandingController::class, 'index'])->name('outstanding.index');
 
+    // Fee Reports
+    Route::get('reports', [\App\Http\Controllers\Web\FeeReportController::class, 'index'])->name('reports');
+
     // Scholarships
     Route::resource('scholarships', \App\Http\Controllers\Web\ScholarshipController::class)
         ->names('scholarships');
@@ -481,6 +484,7 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['auth', 'role:admin'])->prefix('admin/credentials')->name('admin.credentials.')->group(function () {
         Route::get('/', [\App\Http\Controllers\Web\AdminController::class, 'credentials'])->name('index');
         Route::post('/reset-password/{userId}', [\App\Http\Controllers\Web\AdminController::class, 'resetPassword'])->name('reset-password');
+        Route::post('/send-credentials/{userId}', [\App\Http\Controllers\Web\AdminController::class, 'sendCredentials'])->name('send-credentials');
         Route::get('/export', [\App\Http\Controllers\Web\AdminController::class, 'exportCredentials'])->name('export');
     });
 

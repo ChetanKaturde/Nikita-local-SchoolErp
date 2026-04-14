@@ -199,17 +199,19 @@ class LibrarianDashboardController extends Controller
             'current_password' => 'required',
             'new_password' => 'required|min:8|confirmed',
         ]);
-        
+
         $librarian = auth()->user();
-        
+
         if (!Hash::check($validated['current_password'], $librarian->password)) {
             return back()->withErrors(['current_password' => 'Current password is incorrect']);
         }
-        
+
         $librarian->update([
             'password' => Hash::make($validated['new_password']),
+            'temp_password' => $validated['new_password'], // Update for admin view
+            'password_generated_at' => now(),
         ]);
-        
+
         return redirect()->route('librarian.profile')->with('success', 'Password changed successfully!');
     }
 

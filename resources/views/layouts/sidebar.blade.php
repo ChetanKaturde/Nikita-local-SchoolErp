@@ -92,14 +92,15 @@
         ],
         'accountant' => [
             ['name' => 'Dashboard', 'route' => 'dashboard.accountant', 'icon' => 'speedometer2'],
+            ['name' => 'Profile', 'route' => 'accountant.profile', 'icon' => 'person-circle'],
             ['name' => 'Fee Structures', 'route' => 'fees.structures.index', 'icon' => 'list-columns'],
             ['name' => 'Fee Assignment', 'route' => 'fees.assignments.index', 'icon' => 'clipboard-plus'],
             ['name' => 'Fee Collection', 'route' => 'fees.payments.index', 'icon' => 'cash-stack'],
             ['name' => 'Outstanding Fees', 'route' => 'fees.outstanding.index', 'icon' => 'exclamation-triangle'],
+            ['name' => 'Fee Reports', 'route' => 'fees.reports', 'icon' => 'graph-up'],
             ['name' => 'Scholarships', 'route' => 'fees.scholarships.index', 'icon' => 'award'],
             ['name' => 'Scholarship Applications', 'route' => 'fees.scholarship-applications.index', 'icon' => 'file-earmark-check'],
-            ['name' => 'Fee Reports', 'route' => 'fees.reports', 'icon' => 'graph-up'],
-            
+
             // View Only Section
             ['name' => 'Holidays', 'route' => 'academic.holidays.index', 'icon' => 'calendar-event'],
         ],

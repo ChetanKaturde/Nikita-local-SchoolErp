@@ -40,8 +40,8 @@
                                 {{ $app->scholarship->name ?? 'N/A' }}<br>
                                 <small class="text-muted">
                                     @if($app->scholarship)
-                                        {{ ucfirst($app->scholarship->discount_type ?? 'fixed') }}: 
-                                        {{ $app->scholarship->discount_value ?? 0 }}{{ ($app->scholarship->discount_type ?? '') === 'percentage' ? '%' : '₹' }}
+                                        {{ ucfirst($app->scholarship->type ?? 'fixed') }}:
+                                        {{ $app->scholarship->value ?? 0 }}{{ ($app->scholarship->type ?? '') === 'percentage' ? '%' : '₹' }}
                                     @else
                                         N/A
                                     @endif

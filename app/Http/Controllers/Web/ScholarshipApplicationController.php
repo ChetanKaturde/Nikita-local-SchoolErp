@@ -75,9 +75,9 @@ class ScholarshipApplicationController extends Controller
             ->get();
 
         foreach ($fees as $fee) {
-            $discountAmount = $scholarship->discount_type === 'percentage'
-                ? ($fee->total_amount * $scholarship->discount_value / 100)
-                : $scholarship->discount_value;
+            $discountAmount = $scholarship->type === 'percentage'
+                ? ($fee->total_amount * $scholarship->value / 100)
+                : $scholarship->value;
 
             $fee->discount_amount += $discountAmount;
             $fee->final_amount = $fee->total_amount - $fee->discount_amount;

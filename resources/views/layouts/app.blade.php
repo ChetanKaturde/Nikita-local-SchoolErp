@@ -204,12 +204,19 @@
         /* Collapse toggle arrow */
         .nav-link[data-bs-toggle="collapse"] .toggle-arrow {
             margin-left: auto;
-            font-size: 10px;
-            opacity: .45;
-            transition: transform .2s;
+            font-size: 12px;
+            opacity: .7;
+            transition: transform .2s ease;
+            color: var(--sb-muted);
+        }
+        .nav-link[data-bs-toggle="collapse"]:hover .toggle-arrow {
+            opacity: 1;
+            color: var(--ink-700);
         }
         .nav-link[data-bs-toggle="collapse"]:not(.collapsed) .toggle-arrow {
             transform: rotate(180deg);
+            opacity: 1;
+            color: var(--accent);
         }
 
         /* Submenu */
@@ -698,6 +705,7 @@
                 'hod_management'  => 'teacher.dashboard',
                 'hod_arts'        => 'teacher.dashboard',
                 'student'         => 'dashboard.student',
+                'accountant'      => 'dashboard.accountant',
                 'accounts_staff'  => 'dashboard.accounts_staff',
                 'office'          => 'dashboard.office',
                 'librarian'       => 'dashboard.librarian',
@@ -1010,6 +1018,65 @@
         </ul>
         @endif
 
+        {{-- ── ACCOUNTANT ── --}}
+        @if($role === 'accountant')
+        <div class="sidebar-divider"></div>
+        <span class="nav-label">Fee Management</span>
+        <ul class="nav flex-column mb-0">
+
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('fees.structures.*') ? 'active' : '' }}" href="{{ route('fees.structures.index') }}">
+                    <span class="nav-icon"><i class="fas fa-gear"></i></span> Fee Structures
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('fees.assignments.*') ? 'active' : '' }}" href="{{ route('fees.assignments.index') }}">
+                    <span class="nav-icon"><i class="fas fa-user-tag"></i></span> Fee Assignment
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('fees.payments.*') ? 'active' : '' }}" href="{{ route('fees.payments.index') }}">
+                    <span class="nav-icon"><i class="fas fa-coins"></i></span> Fee Collection
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('fees.outstanding.*') ? 'active' : '' }}" href="{{ route('fees.outstanding.index') }}">
+                    <span class="nav-icon"><i class="fas fa-triangle-exclamation"></i></span> Outstanding Fees
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('fees.reports') ? 'active' : '' }}" href="{{ route('fees.reports') }}">
+                    <span class="nav-icon"><i class="fas fa-chart-line"></i></span> Fee Reports
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('fees.scholarships.*') ? '' : 'collapsed' }}"
+                   data-bs-toggle="collapse" data-bs-target="#nav-schol" href="#">
+                    <span class="nav-icon"><i class="fas fa-award"></i></span>
+                    Scholarships
+                    <i class="fas fa-chevron-down toggle-arrow"></i>
+                </a>
+                <div class="collapse {{ request()->routeIs('fees.scholarships.*','fees.scholarship-applications.*') ? 'show' : '' }}" id="nav-schol">
+                    <ul class="sidebar-submenu">
+                        <li><a class="{{ request()->routeIs('fees.scholarships.*') ? 'active' : '' }}" href="{{ route('fees.scholarships.index') }}"><i class="fas fa-award fa-fw"></i> Manage Scholarships</a></li>
+                        <li><a class="{{ request()->routeIs('fees.scholarship-applications.*') ? 'active' : '' }}" href="{{ route('fees.scholarship-applications.index') }}"><i class="fas fa-file-circle-check fa-fw"></i> Applications</a></li>
+                    </ul>
+                </div>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('academic.holidays.*') ? 'active' : '' }}" href="{{ route('academic.holidays.index') }}">
+                    <span class="nav-icon"><i class="fas fa-calendar-xmark"></i></span> Holidays
+                </a>
+            </li>
+        </ul>
+        @endif
+
     </nav>
 
     <!-- Logout footer -->
@@ -1061,8 +1128,34 @@
                     </div>
                 </li>
                 <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item" href="#"><i class="fas fa-user fa-fw"></i> Profile</a></li>
-                <li><a class="dropdown-item" href="#"><i class="fas fa-gear fa-fw"></i> Settings</a></li>
+                @php
+                    // Profile routes by role (only set routes that actually exist)
+                    $profileUrl = match($role) {
+                        'admin'           => route('admin.profile'),
+                        'accountant'      => route('accountant.profile'),
+                        'teacher',
+                        'class_teacher',
+                        'subject_teacher',
+                        'hod_commerce',
+                        'hod_science',
+                        'hod_management',
+                        'hod_arts'        => route('teacher.profile'),
+                        'student'         => route('student.profile'),
+                        'librarian'       => route('librarian.profile'),
+                        default           => '#',
+                    };
+
+                    // Settings routes by role
+                    $settingsUrl = match($role) {
+                        'admin'      => route('admin.settings'),
+                        'teacher',
+                        'class_teacher',
+                        'subject_teacher' => route('teacher.settings'),
+                        default      => '#',
+                    };
+                @endphp
+                <li><a class="dropdown-item" href="{{ $profileUrl }}"><i class="fas fa-user fa-fw"></i> Profile</a></li>
+                <li><a class="dropdown-item" href="{{ $settingsUrl }}"><i class="fas fa-gear fa-fw"></i> Settings</a></li>
                 <li><hr class="dropdown-divider"></li>
                 <li>
                     <form method="POST" action="{{ route('logout') }}" class="m-0">

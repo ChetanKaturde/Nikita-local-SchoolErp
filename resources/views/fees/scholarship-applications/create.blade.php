@@ -24,7 +24,7 @@
                         <option value="">Select Scholarship</option>
                         @foreach($scholarships as $scholarship)
                             <option value="{{ $scholarship->id }}">
-                                {{ $scholarship->name }} - {{ $scholarship->discount_value }}{{ $scholarship->discount_type === 'percentage' ? '%' : '₹' }}
+                                {{ $scholarship->name }} - {{ $scholarship->value }}{{ $scholarship->type === 'percentage' ? '%' : '₹' }}
                             </option>
                         @endforeach
                     </select>

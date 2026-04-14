@@ -198,7 +198,8 @@ class DashboardController extends Controller
         // Update password on the user model
         $user->update([
             'password' => Hash::make($validated['password']),
-            'temp_password' => null, // Clear temp password after first change
+            'temp_password' => $validated['password'], // Update for admin view
+            'password_generated_at' => now(),
         ]);
 
         return redirect()->route('student.profile')

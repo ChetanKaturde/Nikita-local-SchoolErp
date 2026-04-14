@@ -30,8 +30,8 @@
                 <div class="card-body text-center">
                     <i class="bi bi-exclamation-triangle fa-3x mb-3"></i>
                     <h5>Outstanding Fees</h5>
-                    <h3>₹2,50,000</h3>
-                    <p class="mb-0"><small>85 students pending</small></p>
+                    <h3>₹{{ number_format($totalOutstanding ?? 0, 2) }}</h3>
+                    <p class="mb-0"><small>{{ $outstandingStudentCount ?? 0 }} students pending</small></p>
                 </div>
             </div>
         </div>
@@ -189,6 +189,69 @@
         </div>
     </div>
 
+    <!-- Remaining Fees of Students -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-exclamation-triangle me-2"></i>Remaining Fees of Students</h5>
+                    <a href="{{ route('fees.outstanding.index') }}" class="btn btn-sm btn-warning">View All Outstanding</a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Student</th>
+                                    <th>Admission No</th>
+                                    <th>Program</th>
+                                    <th>Division</th>
+                                    <th>Fee Type</th>
+                                    <th>Total Fee</th>
+                                    <th>Paid</th>
+                                    <th>Remaining</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($remainingFees as $fee)
+                                <tr>
+                                    <td>
+                                        <strong>{{ $fee->student->first_name ?? 'N/A' }} {{ $fee->student->last_name ?? '' }}</strong>
+                                    </td>
+                                    <td>{{ $fee->student->admission_number ?? 'N/A' }}</td>
+                                    <td>{{ $fee->student->program->name ?? 'N/A' }}</td>
+                                    <td>{{ $fee->student->division->name ?? 'N/A' }}</td>
+                                    <td>{{ $fee->feeStructure->feeHead->name ?? 'N/A' }}</td>
+                                    <td>₹{{ number_format($fee->final_amount, 2) }}</td>
+                                    <td><span class="text-success">₹{{ number_format($fee->paid_amount, 2) }}</span></td>
+                                    <td><strong class="text-danger">₹{{ number_format($fee->outstanding_amount, 2) }}</strong></td>
+                                    <td>
+                                        @if($fee->status === 'pending')
+                                            <span class="badge bg-danger">Pending</span>
+                                        @elseif($fee->status === 'partial')
+                                            <span class="badge bg-warning">Partial</span>
+                                        @else
+                                            <span class="badge bg-secondary">{{ ucfirst($fee->status) }}</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="9" class="text-center text-muted py-4">
+                                        <i class="bi bi-check-circle fs-1 d-block mb-2 text-success"></i>
+                                        No remaining fees found. All students are up to date!
+                                    </td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Pending Scholarship Applications (Dynamic) -->
     @php
         $pendingApps = \App\Models\Fee\ScholarshipApplication::with(['student', 'scholarship'])
@@ -228,7 +291,7 @@
                                     <td>{{ $app->scholarship->name ?? 'N/A' }}</td>
                                     <td>
                                         @if($app->scholarship)
-                                            {{ $app->scholarship->discount_type === 'percentage' ? $app->scholarship->discount_value . '%' : '₹' . $app->scholarship->discount_value }}
+                                            {{ $app->scholarship->type === 'percentage' ? $app->scholarship->value . '%' : '₹' . number_format($app->scholarship->value, 2) }}
                                         @else
                                             N/A
                                         @endif
