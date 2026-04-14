@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\User\Student;
 use App\Helpers\PasswordHelper;
+use App\Mail\SendCredentials;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 class AdminController extends Controller
 {
@@ -117,6 +119,43 @@ class AdminController extends Controller
         ]);
 
         return back()->with('success', 'Password reset successfully for ' . $user->name . '. New password: ' . $newPassword);
+    }
+
+    /**
+     * Send credentials via email (Admin Only)
+     */
+    public function sendCredentials(Request $request, $userId)
+    {
+        // Only admins can send credentials
+        if (!Auth::check() || !Auth::user()->hasRole('admin')) {
+            return back()->with('error', 'Unauthorized access. Only administrators can send credentials.');
+        }
+
+        $user = User::findOrFail($userId);
+
+        // Check if user has a temp password
+        if (!$user->temp_password) {
+            return back()->with('error', 'No temporary password found for this user. Please reset password first.');
+        }
+
+        // Determine user type
+        $userType = 'user';
+        if ($user->hasRole('student')) {
+            $userType = 'student';
+        } elseif ($user->hasRole('teacher')) {
+            $userType = 'teacher';
+        } elseif ($user->hasRole('staff')) {
+            $userType = 'staff';
+        }
+
+        try {
+            // Send email
+            Mail::to($user->email)->send(new SendCredentials($user, $user->temp_password, $userType));
+
+            return back()->with('success', 'Credentials sent successfully to ' . $user->email);
+        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to send credentials: ' . $e->getMessage());
+        }
     }
 
     /**

@@ -462,6 +462,11 @@
                                     <i class="fas fa-eye"></i>
                                 </button>
                                 <button class="btn btn-outline btn-sm"
+                                        onclick="sendCredentials({{ $student->user->id }}, '{{ $student->user->email }}')"
+                                        title="Send credentials via email">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                                <button class="btn btn-outline btn-sm"
                                         onclick="resetPassword('student', {{ $student->user->id }})"
                                         title="Reset password">
                                     <i class="fas fa-arrows-rotate"></i>
@@ -659,6 +664,11 @@
                                     <i class="fas fa-eye"></i>
                                 </button>
                                 <button class="btn btn-outline btn-sm"
+                                        onclick="sendCredentials({{ $member->id }}, '{{ $member->email }}')"
+                                        title="Send credentials via email">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                                <button class="btn btn-outline btn-sm"
                                         onclick="resetPassword('staff', {{ $member->id }})"
                                         title="Reset password">
                                     <i class="fas fa-arrows-rotate"></i>
@@ -811,6 +821,11 @@
                                         onclick="viewPwModal('{{ $teacher->name }}','{{ $teacher->email }}','{{ $teacher->temp_password ?? 'Not Set' }}','{{ $teacher->roles->first()->name ?? 'Teacher' }}')"
                                         title="View details">
                                     <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="btn btn-outline btn-sm"
+                                        onclick="sendCredentials({{ $teacher->id }}, '{{ $teacher->email }}')"
+                                        title="Send credentials via email">
+                                    <i class="fas fa-paper-plane"></i>
                                 </button>
                                 <button class="btn btn-outline btn-sm"
                                         onclick="resetPassword('teacher', {{ $teacher->id }})"
@@ -974,6 +989,20 @@ function resetPassword(type, userId) {
     const form = document.createElement('form');
     form.method = 'POST';
     form.action = `/admin/credentials/reset-password/${userId}`;
+    const tok = document.createElement('input');
+    tok.type = 'hidden'; tok.name = '_token'; tok.value = '{{ csrf_token() }}';
+    form.appendChild(tok);
+    document.body.appendChild(form);
+    form.submit();
+}
+
+/* ── Send credentials ── */
+function sendCredentials(userId, email) {
+    if (!confirm(`Send login credentials to ${email}?`)) return;
+    
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = `/admin/credentials/send-credentials/${userId}`;
     const tok = document.createElement('input');
     tok.type = 'hidden'; tok.name = '_token'; tok.value = '{{ csrf_token() }}';
     form.appendChild(tok);
