@@ -145,9 +145,31 @@ class AcademicSessionController extends Controller
         }
 
         $session->update(['is_active' => !$session->is_active]);
-        
+
         $status = $session->is_active ? 'activated' : 'deactivated';
         return redirect()->back()
                          ->with('success', "Academic session {$status} successfully!");
+    }
+
+    /**
+     * Set a specific session as the active session.
+     * This deactivates all other sessions and activates the chosen one.
+     * Does NOT delete any historical data — only toggles is_active flags.
+     */
+    public function setActive(AcademicSession $session): RedirectResponse
+    {
+        // Validate date range includes today
+        $today = now()->toDateString();
+        if ($today < $session->start_date || $today > $session->end_date) {
+            return back()->with('error', 'Cannot set a session as active that doesn\'t include today\'s date.');
+        }
+
+        // Use the model's setActive method which handles deactivating others
+        if ($session->setActive()) {
+            return redirect()->back()
+                             ->with('success', "Session '{$session->session_name}' is now the active session.");
+        }
+
+        return back()->with('error', 'Failed to set session as active.');
     }
 }

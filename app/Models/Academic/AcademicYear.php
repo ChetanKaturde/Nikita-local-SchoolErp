@@ -83,4 +83,12 @@ class AcademicYear extends Model
             ->orderBy('year_number', 'desc')
             ->first();
     }
+
+    /**
+     * Scope for active academic years
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
 }

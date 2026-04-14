@@ -190,8 +190,15 @@
                                 </td>
                                 <td class="text-end">
                                     <div class="d-flex justify-content-end gap-1">
-                                        @if(!$session->is_active && $isCurrentPeriod)
-                                            <form action="{{ route('academic.sessions.toggle-status', $session) }}" method="POST">
+                                        @if(!$session->is_active)
+                                            <form action="{{ route('academic.sessions.set-active', $session) }}" method="POST" class="d-inline"
+                                                  onsubmit="return confirm('Set {{ $session->session_name }} as the active session? This will deactivate all other sessions.');">
+                                                @csrf
+                                                <button type="submit" class="btn btn-sm btn-outline-success" title="Set as Active Session">
+                                                    ⚡ Set Active
+                                                </button>
+                                            </form>
+                                            <form action="{{ route('academic.sessions.toggle-status', $session) }}" method="POST" class="d-inline">
                                                 @csrf
                                                 @method('PATCH')
                                                 <button type="submit" class="btn btn-sm btn-success" title="Activate Session">
@@ -199,26 +206,20 @@
                                                 </button>
                                             </form>
                                         @elseif($session->is_active)
-                                            <form action="{{ route('academic.sessions.toggle-status', $session) }}" method="POST">
-                                                @csrf
-                                                @method('PATCH')
-                                                <button type="submit" class="btn btn-sm btn-warning" title="Deactivate Session">
-                                                    ⏸️
-                                                </button>
-                                            </form>
+                                            <span class="badge bg-success me-1 align-self-center">✓ Active</span>
                                         @endif
-                                        
-                                        <a href="{{ route('academic.sessions.edit', $session) }}" 
+
+                                        <a href="{{ route('academic.sessions.edit', $session) }}"
                                            class="btn btn-sm btn-primary" title="Edit Session">
                                             ✏️
                                         </a>
-                                        
-                                        <form action="{{ route('academic.sessions.destroy', $session) }}" 
-                                              method="POST" 
+
+                                        <form action="{{ route('academic.sessions.destroy', $session) }}"
+                                              method="POST"
                                               onsubmit="return confirm('Delete {{ $session->session_name }}? This action cannot be undone.');">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-danger" 
+                                            <button type="submit" class="btn btn-sm btn-danger"
                                                     title="Delete Session">
                                                 🗑️
                                             </button>

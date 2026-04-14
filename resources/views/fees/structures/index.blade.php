@@ -5,6 +5,16 @@
 
 @section('content')
 <div class="container-fluid px-4 py-4">
+
+    @if(isset($activeSession) && $activeSession)
+    <div class="alert alert-info mb-3">
+        <i class="bi bi-info-circle me-2"></i>
+        Viewing fee structures for active session: <strong>{{ $activeSession->session_name }}</strong>
+        ({{ $activeSession->start_date->format('M d, Y') }} - {{ $activeSession->end_date->format('M d, Y') }})
+        <a href="{{ route('academic.sessions.index') }}" class="btn btn-sm btn-outline-primary ms-2">Change Session</a>
+    </div>
+    @endif
+
     <div class="row">
         <div class="col-12">
             <div class="card shadow">
@@ -15,6 +25,45 @@
                     </a>
                 </div>
                 <div class="card-body">
+                    <!-- Filters -->
+                    <form method="GET" class="row g-3 mb-3">
+                        <div class="col-md-3">
+                            <label class="form-label small">Program</label>
+                            <select name="program_id" class="form-select form-select-sm" onchange="this.form.submit()">
+                                <option value="">All Programs</option>
+                                @foreach($programs as $program)
+                                    <option value="{{ $program->id }}" {{ request('program_id') == $program->id ? 'selected' : '' }}>
+                                        {{ $program->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small">Fee Head</label>
+                            <select name="fee_head_id" class="form-select form-select-sm" onchange="this.form.submit()">
+                                <option value="">All Fee Heads</option>
+                                @foreach($feeHeads as $head)
+                                    <option value="{{ $head->id }}" {{ request('fee_head_id') == $head->id ? 'selected' : '' }}>
+                                        {{ $head->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small">Academic Year</label>
+                            <input type="text" name="academic_year" class="form-control form-control-sm"
+                                   placeholder="e.g., 2025-2026" value="{{ request('academic_year') }}"
+                                   onchange="this.form.submit()">
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end">
+                            @if(request()->hasAny(['program_id', 'fee_head_id', 'academic_year']))
+                                <a href="{{ route('fees.structures.index') }}" class="btn btn-sm btn-outline-secondary">
+                                    <i class="bi bi-x-circle me-1"></i>Clear Filters
+                                </a>
+                            @endif
+                        </div>
+                    </form>
+
                     <div class="table-responsive">
                         <table class="table table-striped">
                             <thead>
@@ -69,7 +118,7 @@
                             </tbody>
                         </table>
                     </div>
-                    
+
                     {{ $feeStructures->links() }}
                 </div>
             </div>

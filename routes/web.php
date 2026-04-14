@@ -189,6 +189,8 @@ Route::middleware(['auth'])->prefix('academic')->name('academic.')->group(functi
     Route::resource('sessions', \App\Http\Controllers\Web\Academic\AcademicSessionController::class);
     Route::patch('sessions/{session}/toggle-status', [\App\Http\Controllers\Web\Academic\AcademicSessionController::class, 'toggleStatus'])
         ->name('sessions.toggle-status');
+    Route::post('sessions/{session}/set-active', [\App\Http\Controllers\Web\Academic\AcademicSessionController::class, 'setActive'])
+        ->name('sessions.set-active');
     
     // Attendance
     Route::prefix('attendance')->name('attendance.')->group(function () {

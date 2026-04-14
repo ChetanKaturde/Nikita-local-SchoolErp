@@ -16,15 +16,44 @@ class FeeStructureController extends Controller
         $perPage = $request->input('per_page', 10);
         $perPage = in_array($perPage, [10, 15, 25, 50]) ? (int) $perPage : 10;
 
-        $feeStructures = FeeStructure::with(['program', 'feeHead'])->paginate($perPage)->appends($request->query());
-        return view('fees.structures.index', compact('feeStructures', 'perPage'));
+        // Default to active academic session if no filter provided
+        $activeSessionId = \App\Models\Academic\AcademicSession::getCurrentAcademicSessionId();
+
+        $query = FeeStructure::with(['program', 'feeHead'])
+            ->when($request->filled('program_id'), function ($q) use ($request) {
+                $q->where('program_id', $request->program_id);
+            })
+            ->when($request->filled('academic_year'), function ($q) use ($request) {
+                $q->where('academic_year', $request->academic_year);
+            })
+            ->when($request->filled('fee_head_id'), function ($q) use ($request) {
+                $q->where('fee_head_id', $request->fee_head_id);
+            });
+
+        // If no explicit academic_year filter, default to active session
+        if (!$request->filled('academic_year') && $activeSessionId) {
+            $activeSession = \App\Models\Academic\AcademicSession::find($activeSessionId);
+            if ($activeSession) {
+                $query->where('academic_year', $activeSession->session_name);
+            }
+        }
+
+        $feeStructures = $query->paginate($perPage)->appends($request->query());
+
+        // Get filter options
+        $programs = \App\Models\Academic\Program::where('is_active', true)->get();
+        $feeHeads = FeeHead::where('is_active', true)->get();
+        $activeSession = \App\Models\Academic\AcademicSession::getCurrentAcademicSession();
+
+        return view('fees.structures.index', compact('feeStructures', 'perPage', 'programs', 'feeHeads', 'activeSession'));
     }
 
     public function create()
     {
-        $programs = Program::active()->get();
-        $feeHeads = FeeHead::active()->get();
-        return view('fees.structures.create', compact('programs', 'feeHeads'));
+        $programs = \App\Models\Academic\Program::where('is_active', true)->get();
+        $feeHeads = FeeHead::where('is_active', true)->get();
+        $activeSession = \App\Models\Academic\AcademicSession::getCurrentAcademicSession();
+        return view('fees.structures.create', compact('programs', 'feeHeads', 'activeSession'));
     }
 
     public function store(Request $request)
@@ -49,9 +78,10 @@ class FeeStructureController extends Controller
 
     public function edit(FeeStructure $structure)
     {
-        $programs = Program::active()->get();
-        $feeHeads = FeeHead::active()->get();
-        return view('fees.structures.edit', compact('structure', 'programs', 'feeHeads'));
+        $programs = \App\Models\Academic\Program::where('is_active', true)->get();
+        $feeHeads = FeeHead::where('is_active', true)->get();
+        $activeSession = \App\Models\Academic\AcademicSession::getCurrentAcademicSession();
+        return view('fees.structures.edit', compact('structure', 'programs', 'feeHeads', 'activeSession'));
     }
 
     public function update(Request $request, FeeStructure $structure)
