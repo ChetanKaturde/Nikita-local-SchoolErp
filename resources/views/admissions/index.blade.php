@@ -17,7 +17,7 @@
                 <option value="enrolled" {{ request('status') === 'enrolled' ? 'selected' : '' }}>Enrolled</option>
             </select>
             <button type="submit" class="btn btn-outline-secondary">
-                <i class="bi bi-search"></i>
+                <i class="fas fa-search"></i>
             </button>
         </form>
     </div>

@@ -24,7 +24,7 @@ class StoreFeeStructureRequest extends FormRequest
     {
         return [
             'fee_head_id' => ['required', 'exists:fee_heads,id'],
-            'program_id' => ['required', 'exists:programs,id'],
+            'program_id' => ['required', 'exists:standards,id'],
             'division_id' => ['nullable', 'exists:divisions,id'],
             'academic_session_id' => ['required', 'exists:academic_sessions,id'],
             'amount' => ['required', 'numeric', 'min:0', 'max:9999999.99'],

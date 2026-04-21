@@ -13,7 +13,7 @@
                         <h3 class="card-title">
                             <i class="bi bi-clock-history"></i> Promotion History
                         </h3>
-                        <a href="{{ route('academic.promotions.index') }}" class="btn btn-primary">
+                        <a href="{{ route('academic.promotions.index') }}" class="btn btn-primary ms-2">
                             <i class="bi bi-arrow-up-circle"></i> Back to Promotion
                         </a>
                     </div>
@@ -110,7 +110,7 @@
                                         <th>Promotion Type</th>
                                         <th>Promoted By</th>
                                         <th>Status</th>
-                                        <th>Actions</th>
+                                        <th class="text-center">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -181,7 +181,7 @@
                                                     {{ ucfirst($promotion->status) }}
                                                 </span>
                                             </td>
-                                            <td>
+                                            <td class="text-center">
                                                 @if($promotion->status === 'completed' && !$promotion->isRolledBack())
                                                     <button type="button" 
                                                             class="btn btn-sm btn-outline-danger"

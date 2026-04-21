@@ -24,11 +24,43 @@
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Phone *</label>
-                        <input type="text" name="phone" class="form-control" value="{{ $staff->phone }}" required>
+                        <input type="text" name="phone" class="form-control" value="{{ $staff->phone }}" required pattern="[6-9]\d{9}" maxlength="10"
+                               placeholder="Enter 10-digit mobile (start with 6-9)"
+                               title="Mobile number must be 10 digits starting with 6-9">
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Emergency Contact</label>
-                        <input type="text" name="emergency_contact" class="form-control" value="{{ $staff->emergency_contact }}">
+                        <input type="text" name="emergency_contact" class="form-control" value="{{ $staff->emergency_contact }}" pattern="[6-9]\d{9}" maxlength="10"
+                               placeholder="Enter 10-digit mobile (start with 6-9)"
+                               title="Mobile number must be 10 digits starting with 6-9">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Date of Birth *</label>
+                        <input type="date" name="date_of_birth" class="form-control" value="{{ $staff->date_of_birth }}" required
+                               max="{{ date('Y-m-d', strtotime('-18 years')) }}"
+                               min="{{ date('Y-m-d', strtotime('-60 years')) }}"
+                               title="Date of birth (must be between 18 and 60 years)">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Gender *</label>
+                        <select name="gender" class="form-select" required>
+                            <option value="">Select Gender</option>
+                            <option value="male" {{ $staff->gender == 'male' ? 'selected' : '' }}>Male</option>
+                            <option value="female" {{ $staff->gender == 'female' ? 'selected' : '' }}>Female</option>
+                            <option value="other" {{ $staff->gender == 'other' ? 'selected' : '' }}>Other</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">New Password</label>
+                        <input type="password" name="password" class="form-control @error('password') is-invalid @enderror" autocomplete="new-password">
+                        <small class="text-muted">Leave blank to keep current password</small>
+                        @error('password')
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Confirm New Password</label>
+                        <input type="password" name="password_confirmation" class="form-control" autocomplete="new-password">
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Designation *</label>

@@ -79,4 +79,44 @@ class AcademicSession extends Model
             ->where('end_date', '>=', $today)
             ->update(['is_active' => true]);
     }
+
+    /**
+     * Get the currently active academic session.
+     *
+     * @return self|null
+     */
+    public static function getCurrentAcademicSession(): ?self
+    {
+        return self::where('is_active', true)
+            ->orderBy('start_date', 'desc')
+            ->first();
+    }
+
+    /**
+     * Get the currently active academic session ID.
+     *
+     * @return int|null
+     */
+    public static function getCurrentAcademicSessionId(): ?int
+    {
+        $session = self::getCurrentAcademicSession();
+        return $session?->id;
+    }
+
+    /**
+     * Set this session as active (and deactivate all others).
+     * Does NOT delete any data — only toggles is_active flag.
+     *
+     * @return bool
+     */
+    public function setActive(): bool
+    {
+        // Validate date range includes today
+        $today = now()->toDateString();
+        if ($today < $this->start_date || $today > $this->end_date) {
+            return false; // Session doesn't include today
+        }
+
+        return $this->update(['is_active' => true]);
+    }
 }

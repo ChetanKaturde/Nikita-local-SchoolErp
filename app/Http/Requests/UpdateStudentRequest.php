@@ -50,7 +50,7 @@ class UpdateStudentRequest extends FormRequest
             'permanent_address' => ['nullable', 'string', 'max:500'],
 
             // Academic Information
-            'program_id' => ['required', 'integer', 'exists:programs,id'],
+            'program_id' => ['required', 'integer', 'exists:standards,id'],
             'division_id' => ['required', 'integer', 'exists:divisions,id'],
             'academic_session_id' => ['required', 'integer', 'exists:academic_sessions,id,is_active,1'],
             'academic_year' => ['required', 'string', 'max:20'],

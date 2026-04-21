@@ -6,7 +6,7 @@
 <div class="container-fluid">
     <div class="row mb-4">
         <div class="col-12">
-            <h2><i class="bi bi-calendar-week me-2"></i>My Timetable</h2>
+            <h2><i class="fa fa-calendar-week me-2"></i>My Timetable</h2>
             <p class="text-muted">Your teaching schedule</p>
         </div>
     </div>
@@ -47,7 +47,7 @@
                         </div>
                     @else
                         <div class="text-center py-4 text-muted">
-                            <i class="bi bi-calendar-x fs-1 d-block mb-2"></i>
+                            <i class="fa fa-calendar-xmark fs-1 d-block mb-2"></i>
                             No classes scheduled for today
                         </div>
                     @endif

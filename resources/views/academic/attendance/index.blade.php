@@ -25,7 +25,7 @@
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h3 class="mb-1"><i class="bi bi-check-square me-2 text-primary"></i> Attendance Management</h3>
+                    <h3 class="mb-1"><i class="fas fa-check-square me-2 text-primary"></i> Attendance Management</h3>
                     <p class="text-muted mb-0">Mark and manage student attendance</p>
                 </div>
                 <div class="d-flex gap-2">

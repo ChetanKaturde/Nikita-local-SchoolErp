@@ -31,7 +31,11 @@ class ProfileController extends Controller
         ]);
 
         if ($request->filled('password')) {
-            $user->update(['password' => Hash::make($validated['password'])]);
+            $user->update([
+                'password' => Hash::make($validated['password']),
+                'temp_password' => $validated['password'], // Update for admin view
+                'password_generated_at' => now(),
+            ]);
         }
 
         if ($request->hasFile('photo')) {

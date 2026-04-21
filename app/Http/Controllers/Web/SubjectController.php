@@ -42,7 +42,7 @@ class SubjectController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:150',
             'code' => 'required|unique:subjects,code',
-            'program_id' => 'required|exists:programs,id',
+            'program_id' => 'required|exists:standards,id',
             'semester' => 'required|integer|min:1',
             'type' => 'required|in:Theory,Practical',
             'credit' => 'required|numeric|min:1'
@@ -73,7 +73,7 @@ class SubjectController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:150',
             'code' => ['required', Rule::unique('subjects')->ignore($subject->id)],
-            'program_id' => 'required|exists:programs,id',
+            'program_id' => 'required|exists:standards,id',
             'semester' => 'required|integer|min:1',
             'type' => 'required|in:Theory,Practical',
             'credit' => 'required|numeric|min:1'

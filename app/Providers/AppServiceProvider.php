@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Support\Facades\RateLimiter;
@@ -34,6 +35,8 @@ class AppServiceProvider extends ServiceProvider
         
         // Share student variable with all student views
         View::composer('student.*', StudentViewComposer::class);
+
+        Paginator::useBootstrapFive();
     }
     
     /**

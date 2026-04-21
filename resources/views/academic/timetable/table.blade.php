@@ -9,15 +9,15 @@
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h2><i class="bi bi-calendar-week me-2"></i>Timetable Management</h2>
+                    <h2><i class="fa fa-calendar-week me-2"></i>Timetable Management</h2>
                     <p class="text-muted mb-0">Manage class schedules and timetables</p>
                 </div>
                 <div class="btn-group">
                     <a href="{{ route('academic.timetable.table') }}" class="btn btn-outline-primary {{ request()->routeIs('academic.timetable.table') ? 'active' : '' }}">
-                        <i class="bi bi-list"></i> Table View
+                        <i class="fa fa-list"></i> Table View
                     </a>
                     <a href="{{ route('academic.timetable.grid') }}" class="btn btn-outline-primary {{ request()->routeIs('academic.timetable.grid') ? 'active' : '' }}">
-                        <i class="bi bi-grid"></i> Grid View
+                        <i class="fa fa-table-cells"></i> Grid View
                     </a>
                 </div>
             </div>
@@ -95,13 +95,13 @@
                                placeholder="Subject, Teacher, Room..."
                                value="{{ request('search') }}">
                         <button class="btn btn-primary" type="submit">
-                            <i class="bi bi-search"></i>
+                            <i class="fa fa-search"></i>
                         </button>
                     </div>
                 </div>
                 <div class="col-md-1 d-flex align-items-end">
                     <a href="{{ route('academic.timetable.table') }}" class="btn btn-outline-secondary w-100">
-                        <i class="bi bi-arrow-counterclockwise"></i>
+                        <i class="fa fa-rotate-left"></i>
                     </a>
                 </div>
             </form>
@@ -115,14 +115,14 @@
                 <div>
                     @role('admin|principal')
                     <a href="{{ route('academic.timetable.create') }}" class="btn btn-primary">
-                        <i class="bi bi-plus-circle"></i> Add Schedule
+                        <i class="fa fa-plus-circle"></i> Add Schedule
                     </a>
                     @endrole
                 </div>
                 <div>
                     <a href="{{ route('academic.timetable.export.pdf') }}{{ request()->getQueryString() ? '?' . request()->getQueryString() : '' }}" 
                        class="btn btn-outline-danger" target="_blank">
-                        <i class="bi bi-file-earmark-pdf"></i> Export PDF
+                        <i class="fa fa-file-pdf"></i> Export PDF
                     </a>
                 </div>
             </div>
@@ -135,10 +135,10 @@
             <!-- Scroll indicator -->
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <small class="text-muted">
-                    <i class="bi bi-arrows-move"></i> Scroll horizontally to view all columns
+                    <i class="fa fa-arrows-left-right"></i> Scroll horizontally to view all columns
                 </small>
                 <span class="badge bg-primary">
-                    <i class="bi bi-table"></i> {{ $timetables->total() }} Entries
+                    <i class="fa fa-table"></i> {{ $timetables->total() }} Entries
                 </span>
             </div>
             
@@ -175,7 +175,7 @@
                                 <td>
                                     @if($timetable->date)
                                         <div class="d-flex align-items-center">
-                                            <i class="bi bi-calendar-event text-primary me-1"></i>
+                                            <i class="fa fa-calendar-day text-primary me-1"></i>
                                             <span>{{ \Carbon\Carbon::parse($timetable->date)->format('d M Y') }}</span>
                                         </div>
                                         <small class="text-muted">Specific date</small>
@@ -200,19 +200,19 @@
                                 <td>
                                     @switch($timetable->status)
                                         @case('active')
-                                            <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Active</span>
+                                            <span class="badge bg-success"><i class="fa fa-circle-check me-1"></i>Active</span>
                                             @break
                                         @case('cancelled')
-                                            <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i>Cancelled</span>
+                                            <span class="badge bg-danger"><i class="fa fa-circle-xmark me-1"></i>Cancelled</span>
                                             @break
                                         @case('completed')
-                                            <span class="badge bg-info text-dark"><i class="bi bi-check2-all me-1"></i>Completed</span>
+                                            <span class="badge bg-info text-dark"><i class="fa fa-check-double me-1"></i>Completed</span>
                                             @break
                                         @case('upcoming')
-                                            <span class="badge bg-info text-dark"><i class="bi bi-clock me-1"></i>Upcoming</span>
+                                            <span class="badge bg-info text-dark"><i class="fa fa-clock me-1"></i>Upcoming</span>
                                             @break
                                         @case('closed')
-                                            <span class="badge bg-danger"><i class="bi bi-lock me-1"></i>Closed</span>
+                                            <span class="badge bg-danger"><i class="fa fa-lock me-1"></i>Closed</span>
                                             @break
                                         @default
                                             <span class="badge bg-secondary">{{ ucfirst($timetable->status) }}</span>
@@ -224,21 +224,21 @@
                                                 data-id="{{ $timetable->id }}"
                                                 title="View"
                                                 data-bs-toggle="tooltip">
-                                            <i class="bi bi-eye"></i>
+                                            <i class="fa fa-eye"></i>
                                         </button>
                                         @role('admin|principal')
                                         <button type="button" class="btn btn-sm btn-warning btn-edit"
                                                 data-id="{{ $timetable->id }}"
                                                 title="Edit"
                                                 data-bs-toggle="tooltip">
-                                            <i class="bi bi-pencil"></i>
+                                            <i class="fa fa-pencil"></i>
                                         </button>
                                         <button type="button" class="btn btn-sm btn-danger btn-delete"
                                                 data-id="{{ $timetable->id }}"
                                                 data-name="{{ $timetable->subject->name ?? 'Entry' }} on {{ $timetable->date ? \Carbon\Carbon::parse($timetable->date)->format('d M Y') : $timetable->day_of_week }}"
                                                 title="Delete"
                                                 data-bs-toggle="tooltip">
-                                            <i class="bi bi-trash"></i>
+                                            <i class="fa fa-trash"></i>
                                         </button>
                                         @endrole
                                     </div>
@@ -248,7 +248,7 @@
                             <tr>
                                 <td colspan="10" class="text-center py-4">
                                     <div class="text-muted">
-                                        <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                                        <i class="fa fa-inbox fs-1 d-block mb-2"></i>
                                         No timetable entries found
                                     </div>
                                 </td>
@@ -262,7 +262,7 @@
             <div class="card-footer bg-white border-0 px-4 py-3">
                 <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
                     <div class="text-muted pagination-info">
-                        <i class="bi bi-list-ul me-2"></i>
+                        <i class="fa fa-list-ul me-2"></i>
                         Showing <strong>{{ $timetables->firstItem() ?? 0 }}</strong> to <strong>{{ $timetables->lastItem() ?? 0 }}</strong>
                         of <strong>{{ $timetables->total() }}</strong> entries
                         @if($timetables->lastPage() > 1)
@@ -616,7 +616,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                         </tr>
                                         <tr>
                                             <th>Time</th>
-                                            <td><i class="bi bi-clock me-2"></i>${t.formatted_time}</td>
+                                            <td><i class="fa fa-clock me-2"></i>${t.formatted_time}</td>
                                         </tr>
                                         ${t.period_name ? `<tr><th>Period</th><td>${t.period_name}</td></tr>` : ''}
                                         <tr>
@@ -625,15 +625,15 @@ document.addEventListener('DOMContentLoaded', function() {
                                         </tr>
                                         <tr>
                                             <th>Teacher</th>
-                                            <td><i class="bi bi-person me-2"></i>${t.teacher_name}</td>
+                                            <td><i class="fa fa-user me-2"></i>${t.teacher_name}</td>
                                         </tr>
                                         <tr>
                                             <th>Division</th>
-                                            <td><i class="bi bi-people me-2"></i>${t.division_name}</td>
+                                            <td><i class="fa fa-users me-2"></i>${t.division_name}</td>
                                         </tr>
                                         <tr>
                                             <th>Room</th>
-                                            <td><i class="bi bi-geo-alt me-2"></i>${t.room_name}</td>
+                                            <td><i class="fa fa-location-dot me-2"></i>${t.room_name}</td>
                                         </tr>
                                         <tr>
                                             <th>Status</th>
@@ -671,7 +671,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     console.error('Error:', error);
                     document.getElementById('viewModalBody').innerHTML = `
                         <div class="alert alert-danger">
-                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            <i class="fa fa-exclamation-triangle me-2"></i>
                             <strong>Error loading data</strong>
                             <p class="mb-0 mt-2">Unable to load timetable details. Please try again.</p>
                         </div>

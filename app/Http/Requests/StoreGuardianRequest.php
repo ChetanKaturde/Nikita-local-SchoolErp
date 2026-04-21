@@ -25,7 +25,11 @@ class StoreGuardianRequest extends FormRequest
             'education_qualification' => 'nullable|string|max:100',
 
             // Contact Details
-            'mobile_number' => ['required', 'regex:/^[0-9\+\s\-]+$/', 'max:15'],
+            'mobile_number' => [
+                'required',
+                'regex:/^[6-9]\d{9}$/',
+                'size:10'
+            ],
             'email' => 'nullable|email|max:255',
             'address' => 'nullable|string|max:500',
 
@@ -48,7 +52,8 @@ class StoreGuardianRequest extends FormRequest
             'relation.in' => 'Please select a valid relation.',
             'gender.required' => 'Please select guardian gender.',
             'mobile_number.required' => 'Guardian mobile number is required.',
-            'mobile_number.regex' => 'Please enter a valid mobile number.',
+            'mobile_number.regex' => 'Mobile number must be 10 digits starting with 6-9 (e.g., 9876543210).',
+            'mobile_number.size' => 'Mobile number must be exactly 10 digits.',
             'email.email' => 'Please enter a valid email address.',
             'photo.image' => 'Guardian photo must be an image file.',
             'photo.mimes' => 'Guardian photo must be in JPG, PNG, or GIF format.',

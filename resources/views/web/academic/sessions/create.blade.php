@@ -8,12 +8,12 @@
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h3><i class="bi bi-calendar-event me-2 text-primary"></i> Create Academic Session</h3>
-                <a href="{{ route('web.academic.sessions.index') }}" class="btn btn-secondary">
+                <a href="{{ route('academic.sessions.index') }}" class="btn btn-secondary">
                     <i class="bi bi-arrow-left"></i> Back to Sessions
                 </a>
             </div>
 
-            <form action="{{ route('web.academic.sessions.store') }}" method="POST">
+            <form action="{{ route('academic.sessions.store') }}" method="POST">
                 @csrf
                 
                 <div class="row">
@@ -125,7 +125,7 @@
                                 <button type="submit" class="btn btn-success btn-lg me-3">
                                     <i class="bi bi-check-circle"></i> Create Session
                                 </button>
-                                <a href="{{ route('web.academic.sessions.index') }}" class="btn btn-secondary btn-lg">
+                                <a href="{{ route('academic.sessions.index') }}" class="btn btn-secondary btn-lg">
                                     <i class="bi bi-x-circle"></i> Cancel
                                 </a>
                             </div>

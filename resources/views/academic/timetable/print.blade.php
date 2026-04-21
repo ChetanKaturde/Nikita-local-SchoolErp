@@ -8,12 +8,12 @@
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h2><i class="bi bi-printer me-2"></i>Print Timetable</h2>
+                    <h2><i class="fa fa-print me-2"></i>Print Timetable</h2>
                     <p class="text-muted mb-0">{{ $division->division_name }}</p>
                 </div>
                 <div>
                     <button onclick="window.print()" class="btn btn-primary">
-                        <i class="bi bi-print"></i> Print
+                        <i class="fa fa-print"></i> Print
                     </button>
                     <a href="{{ route('academic.timetable.index') }}" class="btn btn-secondary">
                         Back

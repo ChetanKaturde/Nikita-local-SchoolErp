@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Academic\Admission;
 use App\Models\Academic\StudentDocument;
 use App\Models\AuditLog;
+use App\Models\User;
 use App\Models\User\Student;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -19,11 +20,22 @@ class AdmissionService
     public function createStudentFromAdmission(array $data): Student
     {
         return DB::transaction(function () use ($data) {
+            // Check if user already exists with this email
+            $existingUser = User::where('email', $data['email'])->first();
+            if ($existingUser) {
+                throw new \Exception('A user with this email already exists. Please use a different email.');
+            }
+            
+            // Generate random temporary password (8 characters)
+            $tempPassword = bin2hex(random_bytes(4)); // 8 character random string
+            
             // Create user first
-            $user = \App\Models\User::create([
+            $user = User::create([
                 'name' => $data['first_name'] . ' ' . ($data['middle_name'] ?? '') . ' ' . $data['last_name'],
                 'email' => $data['email'],
-                'password' => bcrypt('password123'), // Default password
+                'password' => bcrypt($tempPassword),
+                'temp_password' => $tempPassword,
+                'password_generated_at' => now(),
                 'role' => 'student',
             ]);
             
@@ -305,6 +317,31 @@ class AdmissionService
                 $admission->division->division_name ?? null
             );
 
+            // Copy document paths from admission
+            $photoPath = null;
+            $signaturePath = null;
+            $marksheetPath = null;
+            $castCertPath = null;
+            
+            // Get documents from admission
+            $documents = $admission->documents()->get();
+            foreach ($documents as $doc) {
+                switch ($doc->document_type) {
+                    case 'photo':
+                        $photoPath = $doc->file_path;
+                        break;
+                    case 'signature':
+                        $signaturePath = $doc->file_path;
+                        break;
+                    case 'twelfth_marksheet':
+                        $marksheetPath = $doc->file_path;
+                        break;
+                    case 'cast_certificate':
+                        $castCertPath = $doc->file_path;
+                        break;
+                }
+            }
+
             // Create student record
             $student = \App\Models\User\Student::create([
                 'user_id' => $user->id,
@@ -328,7 +365,11 @@ class AdmissionService
                 'division_id' => $admission->division_id,
                 'academic_session_id' => $admission->academic_session_id,
                 'student_status' => 'active',
-                'admission_date' => now()
+                'admission_date' => now(),
+                'photo_path' => $photoPath,
+                'signature_path' => $signaturePath,
+                'marksheet_path' => $marksheetPath,
+                'cast_certificate_path' => $castCertPath,
             ]);
 
             // Update admission status
@@ -361,6 +402,8 @@ class AdmissionService
             'name' => $admission->first_name . ' ' . $admission->last_name,
             'email' => $admission->email,
             'password' => \Illuminate\Support\Facades\Hash::make($tempPassword),
+            'temp_password' => $tempPassword, // Plain text for admin viewing
+            'password_generated_at' => now(), // Track when generated
             'email_verified_at' => now()
         ]);
 

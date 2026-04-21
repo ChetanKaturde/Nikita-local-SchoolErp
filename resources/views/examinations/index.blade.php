@@ -9,7 +9,7 @@
         <div class="card-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; padding: 16px 24px;">
             <div class="d-flex justify-content-between align-items-center">
                 <h5 class="mb-0 text-white fw-bold">
-                    <i class="bi bi-clipboard-check me-2"></i>Examinations
+                    <i class="fas fa-clipboard-check me-2"></i>Examinations
                 </h5>
                 <a href="{{ route('examinations.create') }}" class="btn btn-light btn-sm fw-bold">
                     <i class="bi bi-plus-circle me-1"></i>Create Exam
@@ -60,16 +60,16 @@
                             <td class="py-3 text-center">
                                 <div class="d-flex gap-1 justify-content-center">
                                     <a href="{{ route('examinations.show', $exam) }}" class="btn btn-sm" style="background: #e3f2fd; color: #1976d2;" title="View">
-                                        <i class="bi bi-eye"></i>
+                                        <i class="fas fa-eye"></i>
                                     </a>
                                     <a href="{{ route('examinations.edit', $exam) }}" class="btn btn-sm" style="background: #fff3e0; color: #f57c00;" title="Edit">
-                                        <i class="bi bi-pencil"></i>
+                                        <i class="fas fa-pencil"></i>
                                     </a>
                                     <form action="{{ route('examinations.destroy', $exam) }}" method="POST" class="d-inline">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-sm" style="background: #ffebee; color: #c62828;" onclick="return confirm('Delete this exam?')" title="Delete">
-                                            <i class="bi bi-trash"></i>
+                                            <i class="fas fa-trash"></i>
                                         </button>
                                     </form>
                                 </div>

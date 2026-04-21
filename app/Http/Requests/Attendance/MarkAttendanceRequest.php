@@ -75,30 +75,9 @@ class MarkAttendanceRequest extends FormRequest
     public function withValidator($validator): void
     {
         $validator->after(function ($validator) {
-            // Check if attendance already exists for this date and division (only for new attendance)
-            if (!$this->isUpdate()) {
-                $existingAttendance = \App\Models\Academic\Attendance::where('division_id', $this->division_id)
-                    ->whereDate('date', $this->date)
-                    ->exists();
-
-                if ($existingAttendance) {
-                    $validator->errors()->add('date', 'Attendance has already been marked for this division on this date. Please use the edit functionality.');
-                }
-            }
-
             // Validate that ALL students in the division have attendance marked
             $this->validateAllStudentsMarked($validator);
         });
-    }
-
-    /**
-     * Check if this is an update request
-     */
-    protected function isUpdate(): bool
-    {
-        // Check for spoofed method (Laravel's _method field) or actual HTTP method
-        $method = $this->input('_method', $this->method());
-        return in_array(strtoupper($method), ['PUT', 'PATCH']);
     }
 
     /**

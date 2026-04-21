@@ -5,7 +5,7 @@
 @section('content')
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1><i class="bi bi-plus-circle me-2"></i>Create New Program</h1>
+        <h1><i class="fas fa-plus-circle me-2"></i>Create New Program</h1>
         <a href="{{ route('academic.programs.index') }}" class="btn btn-secondary">
             <i class="bi bi-arrow-left"></i> Back to Programs
         </a>

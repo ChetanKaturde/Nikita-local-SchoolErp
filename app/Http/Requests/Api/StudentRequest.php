@@ -36,7 +36,7 @@ class StudentRequest extends BaseFormRequest
             'mobile_number' => ['nullable', 'string', 'regex:/^[6-9]\d{9}$/'],
             
             // Academic Information
-            'program_id' => ['required', 'integer', 'exists:programs,id'],
+            'program_id' => ['required', 'integer', 'exists:standards,id'],
             'division_id' => ['required', 'integer', 'exists:divisions,id'],
             'academic_session_id' => ['required', 'integer', 'exists:academic_sessions,id'],
             'academic_year' => ['required', 'string', 'max:20'],

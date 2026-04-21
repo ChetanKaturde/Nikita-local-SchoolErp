@@ -8,11 +8,11 @@
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h2><i class="bi bi-plus-circle me-2"></i>Add Class to Timetable</h2>
+                    <h2><i class="fa fa-plus-circle me-2"></i>Add Class to Timetable</h2>
                     <p class="text-muted mb-0">Schedule a new class</p>
                 </div>
                 <a href="{{ route('academic.timetable.index') }}" class="btn btn-outline-secondary">
-                    <i class="bi bi-arrow-left"></i> Back
+                    <i class="fa fa-arrow-left"></i> Back
                 </a>
             </div>
         </div>
@@ -22,7 +22,7 @@
         <div class="col-md-8">
             <div class="card shadow-sm">
                 <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="bi bi-calendar-event me-2"></i>Class Details</h5>
+                    <h5 class="mb-0"><i class="fa fa-calendar-day me-2"></i>Class Details</h5>
                 </div>
                 <div class="card-body">
                     <form action="{{ route('academic.timetable.store') }}" method="POST">
@@ -88,10 +88,10 @@
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                                 <div class="form-text">
-                                    <i class="bi bi-info-circle"></i> Select a date - day will be auto-detected
+                                    <i class="fa fa-info-circle"></i> Select a date - day will be auto-detected
                                 </div>
                                 <div id="holidayWarning" class="alert alert-warning mt-2 d-none">
-                                    <i class="bi bi-exclamation-triangle"></i>
+                                    <i class="fa fa-exclamation-triangle"></i>
                                     <span id="holidayWarningText"></span>
                                 </div>
                             </div>
@@ -164,10 +164,10 @@
 
                         <div class="d-flex gap-2">
                             <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-check-circle"></i> Schedule Class
+                                <i class="fa fa-circle-check"></i> Schedule Class
                             </button>
                             <a href="{{ route('academic.timetable.index') }}" class="btn btn-outline-secondary">
-                                <i class="bi bi-x-circle"></i> Cancel
+                                <i class="fa fa-circle-xmark"></i> Cancel
                             </a>
                         </div>
                     </form>
@@ -178,7 +178,7 @@
         <div class="col-md-4">
             <div class="card shadow-sm">
                 <div class="card-header bg-info text-white">
-                    <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Information</h5>
+                    <h5 class="mb-0"><i class="fa fa-info-circle me-2"></i>Information</h5>
                 </div>
                 <div class="card-body">
                     <h6>Guidelines:</h6>
@@ -195,7 +195,7 @@
 
             <div class="card shadow-sm mt-3">
                 <div class="card-header bg-warning text-dark">
-                    <h5 class="mb-0"><i class="bi bi-exclamation-triangle me-2"></i>Conflict Check</h5>
+                    <h5 class="mb-0"><i class="fa fa-exclamation-triangle me-2"></i>Conflict Check</h5>
                 </div>
                 <div class="card-body">
                     <p class="small mb-0">
@@ -246,10 +246,10 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.json())
         .then(data => {
             if (data.available) {
-                availabilityDiv.innerHTML = '<i class="bi bi-check-circle text-success"></i> ' + data.message;
+                availabilityDiv.innerHTML = '<i class="fa fa-circle-check text-success"></i> ' + data.message;
                 availabilityDiv.className = 'form-text text-success';
             } else {
-                availabilityDiv.innerHTML = '<i class="bi bi-x-circle text-danger"></i> ' + data.message;
+                availabilityDiv.innerHTML = '<i class="fa fa-circle-xmark text-danger"></i> ' + data.message;
                 availabilityDiv.className = 'form-text text-danger';
             }
         })

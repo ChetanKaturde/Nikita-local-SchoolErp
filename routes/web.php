@@ -21,6 +21,7 @@ use App\Http\Controllers\Teacher\AttendanceController;
 use App\Http\Controllers\Web\AcademicRuleController;
 use App\Http\Controllers\Student\AuthController as StudentAuthController;
 use App\Http\Controllers\Student\DashboardController as StudentDashboardController;
+use App\Http\Controllers\LibrarianDashboardController;
 use App\Http\Controllers\Web\DocumentDownloadController;
 
 // Bulk action route - moved inside auth middleware
@@ -40,45 +41,31 @@ Route::middleware('guest:student')->group(function () {
 // ============================================
 // STUDENT AUTHENTICATED ROUTES
 // ============================================
-Route::middleware('auth:student')->prefix('student')->name('student.')->group(function () {
-    // Logout
-    Route::post('/logout', [StudentAuthController::class, 'logout'])->name('logout');
+// Note: Student authenticated routes are now in routes/student.php
+// to avoid route name conflicts and maintain consistency
+
+// Librarian Routes
+Route::middleware(['auth', 'role:librarian'])->prefix('librarian')->name('librarian.')->group(function () {
+    // Librarian Dashboard
+    Route::get('/dashboard', [LibrarianDashboardController::class, 'index'])->name('dashboard');
     
-    // Dashboard
-    Route::get('/dashboard', [StudentDashboardController::class, 'index'])->name('dashboard');
+    // Librarian Profile
+    Route::get('/profile', [LibrarianDashboardController::class, 'profile'])->name('profile');
+    Route::put('/profile', [LibrarianDashboardController::class, 'updateProfile'])->name('profile.update');
+    Route::post('/profile/change-password', [LibrarianDashboardController::class, 'changePassword'])->name('profile.change-password');
     
-    // Profile
-    Route::get('/profile', [StudentDashboardController::class, 'profile'])->name('profile');
-    Route::get('/profile/edit', [StudentDashboardController::class, 'editProfile'])->name('profile.edit');
-    Route::put('/profile', [StudentDashboardController::class, 'updateProfile'])->name('profile.update');
-    Route::get('/profile/change-password', [StudentDashboardController::class, 'changePassword'])->name('profile.change-password');
-    Route::post('/profile/change-password', [StudentDashboardController::class, 'updatePassword']);
+    // Issued Books
+    Route::get('/issued-books', [LibrarianDashboardController::class, 'issuedBooks'])->name('issued-books');
     
-    // Timetable
-    Route::get('/timetable', [StudentDashboardController::class, 'timetable'])->name('timetable');
-    
-    // Attendance
-    Route::get('/attendance', [StudentDashboardController::class, 'attendance'])->name('attendance');
-    
-    // Fees
-    Route::get('/fees', [StudentDashboardController::class, 'fees'])->name('fees');
-    Route::get('/fees/payment/{studentFee}', [StudentDashboardController::class, 'feesPayment'])->name('fees.payment');
-    
-    // Results
-    Route::get('/results', [StudentDashboardController::class, 'results'])->name('results');
-    
-    // Library
-    Route::get('/library', [StudentDashboardController::class, 'library'])->name('library');
-    
-    // Notifications
-    Route::get('/notifications', [StudentDashboardController::class, 'notifications'])->name('notifications');
-    Route::post('/notifications/{id}/read', [StudentDashboardController::class, 'markNotificationAsRead'])->name('notifications.read');
-    Route::post('/notifications/read-all', [StudentDashboardController::class, 'markAllNotificationsAsRead'])->name('notifications.read-all');
+    // Students List
+    Route::get('/students', [LibrarianDashboardController::class, 'students'])->name('students');
+    Route::get('/students/{student}', [LibrarianDashboardController::class, 'studentDetails'])->name('student-details');
+    Route::post('/students/{student}/contact', [LibrarianDashboardController::class, 'contactStudent'])->name('contact-student');
 });
 
 Route::prefix('dashboard/principal')
     ->name('principal.')
-    ->middleware(['auth'])
+    ->middleware(['auth', 'role:principal|admin'])
     ->group(function () {
 
         Route::get('/', [PrincipalDashboardController::class, 'index'])
@@ -110,13 +97,7 @@ Route::prefix('dashboard/principal')
 
 // In routes/web.php, inside Route::middleware(['auth', 'admin'])->group(function () { ... });
 
-Route::prefix('attendance')->name('attendance.')->group(function () {
-    Route::get('/', [App\Http\Controllers\Web\AttendanceController::class, 'index'])->name('index');
-    Route::post('/create', [App\Http\Controllers\Web\AttendanceController::class, 'create'])->name('create');
-    Route::post('/', [App\Http\Controllers\Web\AttendanceController::class, 'store'])->name('store');
-    Route::get('/report', [App\Http\Controllers\Web\AttendanceController::class, 'report'])->name('report');
-});
-
+// Attendance routes removed - duplicates exist in academic prefix group with proper auth
 
 Route::middleware(['auth', 'role:admin|principal'])->group(function () {
     // Web-specific route names with 'web.' prefix
@@ -141,12 +122,46 @@ Route::middleware(['auth', 'role:super_admin|admin'])->prefix('admin')->name('ad
     Route::resource('roles', \App\Http\Controllers\Web\RoleController::class);
     Route::get('roles/{role}/permissions', [\App\Http\Controllers\Web\RoleController::class, 'permissions'])->name('roles.permissions');
     Route::put('roles/{role}/permissions', [\App\Http\Controllers\Web\RoleController::class, 'updatePermissions'])->name('roles.permissions.update');
-    
+
     // Permissions Management
     Route::resource('permissions', \App\Http\Controllers\Web\PermissionController::class);
-    
+
     // Activity Logs
     Route::get('activity-logs', [\App\Http\Controllers\Web\ActivityLogController::class, 'index'])->name('activity-logs.index');
+
+    // Notifications Management
+    Route::get('/notifications', [\App\Http\Controllers\Admin\NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('/notifications/create', [\App\Http\Controllers\Admin\NotificationController::class, 'create'])->name('notifications.create');
+    Route::post('/notifications', [\App\Http\Controllers\Admin\NotificationController::class, 'store'])->name('notifications.store');
+    Route::get('/notifications/{notification}', [\App\Http\Controllers\Admin\NotificationController::class, 'show'])->name('notifications.show');
+    Route::get('/notifications/{notification}/edit', [\App\Http\Controllers\Admin\NotificationController::class, 'edit'])->name('notifications.edit');
+    Route::put('/notifications/{notification}', [\App\Http\Controllers\Admin\NotificationController::class, 'update'])->name('notifications.update');
+    Route::delete('/notifications/{notification}', [\App\Http\Controllers\Admin\NotificationController::class, 'destroy'])->name('notifications.destroy');
+    Route::post('/notifications/{notification}/toggle', [\App\Http\Controllers\Admin\NotificationController::class, 'toggleActive'])->name('notifications.toggle');
+
+    // Admin Profile
+    Route::get('/profile', [\App\Http\Controllers\Admin\ProfileController::class, 'index'])->name('profile');
+    Route::get('/profile/edit', [\App\Http\Controllers\Admin\ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [\App\Http\Controllers\Admin\ProfileController::class, 'update'])->name('profile.update');
+    Route::get('/profile/change-password', [\App\Http\Controllers\Admin\ProfileController::class, 'editPassword'])->name('profile.edit-password');
+    Route::post('/profile/change-password', [\App\Http\Controllers\Admin\ProfileController::class, 'updatePassword'])->name('profile.update-password');
+
+    // Admin Settings
+    Route::get('/settings', [\App\Http\Controllers\Admin\SettingsController::class, 'index'])->name('settings');
+    Route::put('/settings', [\App\Http\Controllers\Admin\SettingsController::class, 'update'])->name('settings.update');
+    Route::get('/settings/system', [\App\Http\Controllers\Admin\SettingsController::class, 'system'])->name('settings.system');
+    Route::post('/settings/clear-cache', [\App\Http\Controllers\Admin\SettingsController::class, 'clearCache'])->name('settings.clear-cache');
+
+    // Admin Fee Management
+    Route::get('/fees', [\App\Http\Controllers\Admin\FeeManagementController::class, 'index'])->name('fees');
+    Route::get('/fees/structures', [\App\Http\Controllers\Admin\FeeManagementController::class, 'structures'])->name('fees.structures');
+    Route::get('/fees/structures/create', [\App\Http\Controllers\Admin\FeeManagementController::class, 'createStructure'])->name('fees.structures.create');
+    Route::post('/fees/structures', [\App\Http\Controllers\Admin\FeeManagementController::class, 'storeStructure'])->name('fees.structures.store');
+    Route::get('/fees/student-fees', [\App\Http\Controllers\Admin\FeeManagementController::class, 'studentFees'])->name('fees.student-fees');
+    Route::get('/fees/payments', [\App\Http\Controllers\Admin\FeeManagementController::class, 'payments'])->name('fees.payments');
+    Route::get('/fees/outstanding', [\App\Http\Controllers\Admin\FeeManagementController::class, 'outstanding'])->name('fees.outstanding');
+    Route::get('/fees/reports', [\App\Http\Controllers\Admin\FeeManagementController::class, 'reports'])->name('fees.reports');
+    Route::post('/fees/pay', [\App\Http\Controllers\Admin\FeeManagementController::class, 'processPayment'])->name('fees.pay');
 });
 
 // Academic Management
@@ -174,6 +189,8 @@ Route::middleware(['auth'])->prefix('academic')->name('academic.')->group(functi
     Route::resource('sessions', \App\Http\Controllers\Web\Academic\AcademicSessionController::class);
     Route::patch('sessions/{session}/toggle-status', [\App\Http\Controllers\Web\Academic\AcademicSessionController::class, 'toggleStatus'])
         ->name('sessions.toggle-status');
+    Route::post('sessions/{session}/set-active', [\App\Http\Controllers\Web\Academic\AcademicSessionController::class, 'setActive'])
+        ->name('sessions.set-active');
     
     // Attendance
     Route::prefix('attendance')->name('attendance.')->group(function () {
@@ -287,8 +304,27 @@ Route::middleware(['auth', 'role:admin|principal'])->prefix('academic')->name('a
 });
 
 // Fee Management Routes
-Route::middleware(['auth', 'role:admin|principal|office|accountant'])->prefix('fees')->name('fees.')->group(function () {
-Route::middleware(['auth', 'role:admin|principal|office|teacher'])->prefix('fees')->name('fees.')->group(function () {
+Route::middleware(['auth', 'role:admin|principal|office|teacher|accountant'])->prefix('fees')->name('fees.')->group(function () {
+    // Fee Heads
+    Route::resource('fee-heads', \App\Http\Controllers\Web\FeeHeadController::class)
+        ->names('fee-heads');
+    
+    // Custom route for getting active fee heads (AJAX)
+    Route::get('fee-heads/active', [\App\Http\Controllers\Web\FeeHeadController::class, 'getActive'])
+        ->name('fee-heads.active');
+    
+    // Custom route for storing fee head via AJAX
+    Route::post('fee-heads/ajax', [\App\Http\Controllers\Web\FeeHeadController::class, 'storeAjax'])
+        ->name('fee-heads.store.ajax');
+    
+    // Custom route for updating fee head via AJAX
+    Route::match(['put', 'post'], 'fee-heads/{feeHead}/ajax', [\App\Http\Controllers\Web\FeeHeadController::class, 'updateAjax'])
+        ->name('fee-heads.update.ajax.post');
+    
+    // Custom route for deleting fee head via AJAX
+    Route::delete('fee-heads/{feeHead}/ajax', [\App\Http\Controllers\Web\FeeHeadController::class, 'destroyAjax'])
+        ->name('fee-heads.destroy.ajax.post');
+
     // Fee Structures
     Route::resource('structures', \App\Http\Controllers\Web\FeeStructureController::class)
         ->names('structures');
@@ -307,6 +343,9 @@ Route::middleware(['auth', 'role:admin|principal|office|teacher'])->prefix('fees
     // Outstanding Fees
     Route::get('outstanding', [\App\Http\Controllers\Web\FeeOutstandingController::class, 'index'])->name('outstanding.index');
 
+    // Fee Reports
+    Route::get('reports', [\App\Http\Controllers\Web\FeeReportController::class, 'index'])->name('reports');
+
     // Scholarships
     Route::resource('scholarships', \App\Http\Controllers\Web\ScholarshipController::class)
         ->names('scholarships');
@@ -321,8 +360,7 @@ Route::middleware(['auth'])->prefix('razorpay')->group(function () {
 Route::post('/razorpay/webhook', [\App\Http\Controllers\Web\RazorpayController::class, 'webhook']);
 
 // Scholarship Application Routes
-Route::middleware(['auth', 'role:admin|principal|office|accountant'])->prefix('fees/scholarship-applications')->name('fees.scholarship-applications.')->group(function () {
-Route::middleware(['auth', 'role:admin|principal|office|teacher'])->prefix('fees/scholarship-applications')->name('fees.scholarship-applications.')->group(function () {
+Route::middleware(['auth', 'role:admin|principal|office|teacher|accountant'])->prefix('fees/scholarship-applications')->name('fees.scholarship-applications.')->group(function () {
     Route::get('/', [\App\Http\Controllers\Web\ScholarshipApplicationController::class, 'index'])->name('index');
     Route::get('/create', [\App\Http\Controllers\Web\ScholarshipApplicationController::class, 'create'])->name('create');
     Route::post('/', [\App\Http\Controllers\Web\ScholarshipApplicationController::class, 'store'])->name('store');
@@ -335,51 +373,7 @@ Route::middleware(['auth'])->group(function () {
     // Teacher Management
     Route::resource('dashboard/teachers', \App\Http\Controllers\Web\TeacherController::class)
         ->names('dashboard.teachers');
-    
-    // Test storage route
-    Route::get('/test-storage', function() {
-        $students = \App\Models\User\Student::with(['program', 'division'])->limit(5)->get();
-        return view('test-storage', compact('students'));
-    });
-    
-    // Test route to add holiday for today
-    Route::get('/test-add-holiday', function() {
-        $today = now()->format('Y-m-d');
-        
-        // Get current academic year using the proper method
-        $academicYearId = \App\Models\Academic\AcademicYear::getCurrentAcademicYearId();
-        
-        if (!$academicYearId) {
-            // Create academic year if none exists
-            $academicYear = \App\Models\Academic\AcademicYear::create([
-                'name' => '2025-2026',
-                'start_date' => '2025-06-01',
-                'end_date' => '2026-05-31',
-                'is_active' => true,
-            ]);
-            $academicYearId = $academicYear->id;
-        }
-        
-        // Delete any existing holiday for today
-        \App\Models\Holiday::where('start_date', '<=', $today)
-            ->where('end_date', '>=', $today)
-            ->delete();
-        
-        // Create holiday for today
-        $holiday = \App\Models\Holiday::create([
-            'title' => 'Test Holiday - School Closed Today!',
-            'description' => 'This is a test holiday added via test route',
-            'start_date' => $today,
-            'end_date' => $today,
-            'type' => 'school_holiday',
-            'is_recurring' => false,
-            'academic_year_id' => $academicYearId,
-            'is_active' => true,
-        ]);
-        
-        return redirect()->route('teacher.divisions.index')->with('success', 'Holiday added for today: ' . $holiday->title);
-    });
-    
+
     // Bulk action route - inside auth middleware (must be before wildcard route)
     Route::post('/dashboard/students/bulk-action', [StudentController::class, 'bulkAction'])->name('dashboard.students.bulkAction');
     Route::delete('/dashboard/students/bulk-action', [StudentController::class, 'bulkAction']);
@@ -422,7 +416,7 @@ Route::post('/reset-password', [\App\Http\Controllers\Web\PasswordResetControlle
 Route::get('/apply', [AdmissionController::class, 'showApplyForm'])->name('admissions.apply.form');
 Route::post('/apply', [AdmissionController::class, 'apply'])->name('admissions.apply');
 
-// Root route - redirect to login if not authenticated
+// Root route - Show landing page
 Route::get('/', function() {
     if (auth()->check()) {
         $user = auth()->user();
@@ -432,34 +426,28 @@ Route::get('/', function() {
         if ($role === 'student' && $user->email === 'librarian@schoolerp.com') {
             $role = 'librarian';
         }
-        if ($role === 'accountant') {
-            return redirect()->route('dashboard.accountant');
-        }
-        return redirect()->route("dashboard.{$role}");
-
-        // Role-based redirect with proper route mapping
         $redirectRoutes = [
-            'principal' => 'dashboard.principal',
-            'admin' => 'dashboard.admin',
-            'teacher' => 'teacher.dashboard',
-            'class_teacher' => 'teacher.dashboard',
+            'principal'       => 'dashboard.principal',
+            'admin'           => 'dashboard.admin',
+            'teacher'         => 'teacher.dashboard',
+            'class_teacher'   => 'teacher.dashboard',
             'subject_teacher' => 'teacher.dashboard',
-            'student' => 'dashboard.student',
-            'accountant' => 'dashboard.accounts_staff',
-            'accounts_staff' => 'dashboard.accounts_staff',
-            'office' => 'dashboard.office',
-            'librarian' => 'dashboard.librarian',
-            'hod_commerce' => 'teacher.dashboard',
-            'hod_science' => 'teacher.dashboard',
-            'hod_management' => 'teacher.dashboard',
-            'hod_arts' => 'teacher.dashboard',
+            'student'         => 'student.dashboard',  // Changed to student.dashboard (student guard)
+            'accountant'      => 'dashboard.accountant',
+            'accounts_staff'  => 'dashboard.accounts_staff',
+            'office'          => 'dashboard.office',
+            'librarian'       => 'dashboard.librarian',
+            'hod_commerce'    => 'teacher.dashboard',
+            'hod_science'     => 'teacher.dashboard',
+            'hod_management'  => 'teacher.dashboard',
+            'hod_arts'        => 'teacher.dashboard',
         ];
 
         $route = $redirectRoutes[$role] ?? 'dashboard.student';
 
         return redirect()->route($route);
     }
-    return redirect()->route('login');
+    return view('landing');
 });
 
 // Protected Routes
@@ -491,15 +479,26 @@ Route::middleware(['auth'])->group(function () {
         ->middleware('role:principal|admin');
     
     Route::get('/dashboard/admin', [\App\Http\Controllers\Web\PrincipalDashboardController::class, 'index'])
-        ->name('dashboard.admin');
+        ->name('dashboard.admin')
+        ->middleware('role:admin');
+    
+    // Admin Credentials Management (Admin Only)
+    Route::middleware(['auth', 'role:admin'])->prefix('admin/credentials')->name('admin.credentials.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Web\AdminController::class, 'credentials'])->name('index');
+        Route::post('/reset-password/{userId}', [\App\Http\Controllers\Web\AdminController::class, 'resetPassword'])->name('reset-password');
+        Route::post('/send-credentials/{userId}', [\App\Http\Controllers\Web\AdminController::class, 'sendCredentials'])->name('send-credentials');
+        Route::get('/export', [\App\Http\Controllers\Web\AdminController::class, 'exportCredentials'])->name('export');
+    });
 
     // Teacher Dashboard Routes are in routes/teacher.php
 
     Route::get('/dashboard/student', [DashboardController::class, 'student'])->name('dashboard.student');
-    Route::get('/dashboard/office', [DashboardController::class, 'office'])->name('dashboard.office');
-    Route::get('/dashboard/accounts_staff', [DashboardController::class, 'accounts_staff'])->name('dashboard.accounts_staff');
-    Route::get('/dashboard/accountant', [DashboardController::class, 'accountant'])->name('dashboard.accountant');
-    Route::get('/dashboard/librarian', [DashboardController::class, 'librarian'])->name('dashboard.librarian');
+    Route::get('/dashboard/office', [DashboardController::class, 'office'])->name('dashboard.office')->middleware('role:office');
+    Route::get('/dashboard/accounts_staff', [DashboardController::class, 'accounts_staff'])->name('dashboard.accounts_staff')->middleware('role:accounts_staff');
+    Route::get('/dashboard/accountant', [DashboardController::class, 'accountant'])->name('dashboard.accountant')->middleware('role:accountant');
+    Route::get('/accountant/profile', [DashboardController::class, 'accountantProfile'])->name('accountant.profile')->middleware('role:accountant');
+    Route::post('/accountant/profile/change-password', [DashboardController::class, 'accountantChangePassword'])->name('accountant.change-password')->middleware('role:accountant');
+    Route::get('/dashboard/librarian', [DashboardController::class, 'librarian'])->name('dashboard.librarian')->middleware('role:librarian');
     
     // Student Management
     // (handled earlier with explicit dashboard routes)
@@ -591,6 +590,7 @@ Route::middleware(['auth'])->prefix('library')->name('library.')->group(function
 
 // Staff Management
 Route::middleware(['auth'])->prefix('staff')->name('staff.')->group(function () {
+    Route::get('/dashboard', [StaffController::class, 'index'])->name('dashboard');
     Route::get('/', [StaffController::class, 'index'])->name('index');
     Route::get('/create', [StaffController::class, 'create'])->name('create');
     Route::post('/', [StaffController::class, 'store'])->name('store');
@@ -602,4 +602,7 @@ Route::middleware(['auth'])->prefix('staff')->name('staff.')->group(function () 
 
 // Teacher Dashboard Routes
 require __DIR__ . '/teacher.php';
+
+// Student Dashboard Routes
+require __DIR__ . '/student.php';
 

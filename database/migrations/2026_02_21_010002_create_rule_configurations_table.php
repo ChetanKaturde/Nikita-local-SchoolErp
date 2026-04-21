@@ -139,7 +139,6 @@ return new class extends Migration
                 'program_id',
                 'is_active'
             ], 'rule_resolution_idx');
-            ], 'rc_resolution_idx');
         });
     }
 

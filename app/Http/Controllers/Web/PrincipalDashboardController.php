@@ -60,7 +60,7 @@ class PrincipalDashboardController extends Controller
         $totalSubjects = Subject::count();
 
         // Today's Attendance
-        $attendanceToday = Attendance::whereDate('attendance_date', Carbon::today())
+        $attendanceToday = Attendance::whereDate('date', Carbon::today())
             ->select(
                 DB::raw('COUNT(CASE WHEN status = "present" THEN 1 END) as present'),
                 DB::raw('COUNT(CASE WHEN status = "absent" THEN 1 END) as absent'),
@@ -74,6 +74,12 @@ class PrincipalDashboardController extends Controller
 
         $totalClasses = $totalDivisions; // Alias for blade compatibility
         $todayAttendance = $attendanceToday ? $attendanceToday->total : 0;
+
+        // Get recently created users with passwords (for admin panel)
+        $recentUsersWithPasswords = User::whereNotNull('temp_password')
+            ->orderBy('password_generated_at', 'desc')
+            ->limit(10)
+            ->get();
 
         // Fee collection - Current month
         $feeCollection = FeePayment::whereMonth('created_at', Carbon::now())
@@ -138,7 +144,8 @@ class PrincipalDashboardController extends Controller
             'subjects',
             'teachers',
             'academicYears',
-            'days'
+            'days',
+            'recentUsersWithPasswords'
         ));
     }
 

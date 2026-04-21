@@ -13,7 +13,7 @@
                         <h3 class="card-title">
                             <i class="bi bi-arrow-up-circle"></i> Student Promotion
                         </h3>
-                        <a href="{{ route('academic.promotions.history') }}" class="btn btn-info">
+                        <a href="{{ route('academic.promotions.history') }}" class="btn btn-info ms-2">
                             <i class="bi bi-clock-history"></i> View History
                         </a>
                     </div>
@@ -93,14 +93,14 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="card-title">Eligible Students for Promotion</h5>
-                        <div>
-                            <button type="button" class="btn btn-warning" id="previewBtn" disabled>
-                                <i class="bi bi-eye"></i> Preview Promotion
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                        <h5 class="card-title mb-0">Eligible Students for Promotion</h5>
+                        <div class="d-flex flex-wrap gap-2">
+                            <button type="button" class="btn btn-warning btn-sm text-nowrap" id="previewBtn" disabled>
+                                <i class="bi bi-eye"></i> Preview
                             </button>
-                            <button type="button" class="btn btn-success" id="promoteBtn" disabled>
-                                <i class="bi bi-check-circle"></i> Promote Selected
+                            <button type="button" class="btn btn-success btn-sm text-nowrap" id="promoteBtn" disabled>
+                                <i class="bi bi-check-circle"></i> Promote
                             </button>
                         </div>
                     </div>

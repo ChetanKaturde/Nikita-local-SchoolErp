@@ -10,9 +10,33 @@
             <h2><i class="bi bi-calendar-check me-2"></i>Mark Attendance</h2>
             <p class="text-muted mb-0">{{ $timetable->division->division_name }} - {{ $timetable->subject->name }}</p>
         </div>
-        <a href="{{ route('teacher.attendance.index') }}" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left"></i> Back
-        </a>
+        <div class="d-flex gap-2">
+            @if($attendanceDates->count() > 0)
+            <div class="dropdown">
+                <button class="btn btn-outline-primary dropdown-toggle" type="button" id="editAttendanceDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-pencil-square me-1"></i>Edit Attendance
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="editAttendanceDropdown">
+                    @foreach($attendanceDates as $attDate)
+                        <li>
+                            <a class="dropdown-item {{ $attDate == $date ? 'active' : '' }}" 
+                               href="{{ route('teacher.attendance.create', $timetable->id) }}?date={{ $attDate->format('Y-m-d') }}">
+                                {{ $attDate->format('d M Y') }}
+                                @php
+                                    $count = \App\Models\Academic\Attendance::where('timetable_id', $timetable->id)
+                                        ->whereDate('date', $attDate)->count();
+                                @endphp
+                                <span class="badge bg-primary float-end">{{ $count }} students</span>
+                            </a>
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
+            @endif
+            <a href="{{ route('teacher.attendance.index') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Back
+            </a>
+        </div>
     </div>
 
     <!-- Lecture Info Card -->
@@ -54,11 +78,22 @@
     <!-- Attendance Form -->
     <form id="attendanceForm" action="{{ route('teacher.attendance.store', $timetable->id) }}" method="POST">
         @csrf
+        @method('POST')
         <input type="hidden" name="date" value="{{ $date }}">
-        
+        <input type="hidden" name="timetable_id" value="{{ $timetable->id }}">
+
+        @if($existingAttendance->count() > 0)
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            <i class="bi bi-info-circle me-2"></i>
+            <strong>Editing Attendance</strong> for {{ \Carbon\Carbon::parse($date)->format('d M Y') }}. 
+            Modify the status and remarks as needed, then click Update.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        @endif
+
         <div class="card shadow-sm">
             <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                <h5 class="mb-0"><i class="bi bi-list-check me-2"></i>Student List ({{ $students->count() }})</h5>
+                <h5 class="mb-0"><i class="bi bi-list-check me-2"></i>Student List ({{ $students->total() }} students)</h5>
                 <div class="btn-group">
                     <button type="button" class="btn btn-sm btn-outline-success" onclick="markAll('present')">
                         <i class="bi bi-check-circle me-1"></i>Mark All Present
@@ -95,10 +130,10 @@
                                         <div class="d-flex align-items-center">
                                             <div class="rounded-circle me-2 bg-primary bg-gradient d-flex align-items-center justify-content-center text-white fw-bold"
                                                  style="width: 35px; height: 35px; min-width: 35px;">
-                                                {{ strtoupper(substr($student->name ?? 'S', 0, 1)) }}
+                                                {{ strtoupper(substr($student->first_name ?? 'S', 0, 1)) }}
                                             </div>
                                             <div>
-                                                <div class="fw-semibold">{{ $student->name }}</div>
+                                                <div class="fw-semibold">{{ $student->first_name }} {{ $student->last_name }}</div>
                                                 @if($existing)
                                                     <small class="text-success"><i class="bi bi-check-circle"></i> Previously marked</small>
                                                 @endif
@@ -142,6 +177,19 @@
                     </table>
                 </div>
             </div>
+            
+            {{-- Pagination --}}
+            <div class="card-footer bg-white border-0 p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        {{ $students->links('pagination::bootstrap-5') }}
+                    </div>
+                    <p class="text-muted mb-0">
+                        Showing {{ $students->firstItem() ?? 0 }} to {{ $students->lastItem() ?? 0 }} of {{ $students->total() }} students
+                    </p>
+                </div>
+            </div>
+            
             <div class="card-footer bg-white border-0 p-3">
                 <div class="d-flex justify-content-between align-items-center">
                     <p class="text-muted mb-0">
@@ -150,7 +198,7 @@
                     </p>
                     <div>
                         <button type="button" class="btn btn-primary btn-lg" onclick="submitAttendance()">
-                            <i class="bi bi-check-circle me-2"></i>Submit Attendance
+                            <i class="bi bi-check-circle me-2"></i>{{ $existingAttendance->count() > 0 ? 'Update Attendance' : 'Submit Attendance' }}
                         </button>
                     </div>
                 </div>
@@ -179,9 +227,37 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
+    
+    // Save form data to sessionStorage before pagination
+    document.querySelectorAll('a[href*="page="]').forEach(link => {
+        link.addEventListener('click', function(e) {
+            const formData = new FormData(form);
+            const data = {};
+            formData.forEach((value, key) => {
+                data[key] = value;
+            });
+            sessionStorage.setItem('attendanceData', JSON.stringify(data));
+        });
+    });
+    
+    // Restore form data from sessionStorage
+    const savedData = sessionStorage.getItem('attendanceData');
+    if (savedData) {
+        const data = JSON.parse(savedData);
+        Object.keys(data).forEach(key => {
+            if (key.startsWith('attendances[')) {
+                const input = document.querySelector(`[name="${key}"][value="${data[key]}"]`);
+                if (input) input.checked = true;
+                const textInput = document.querySelector(`[name="${key}"]`);
+                if (textInput && textInput.type === 'text') textInput.value = data[key];
+            }
+        });
+    }
 });
 
 function submitAttendance() {
+    // Clear saved data on successful submit
+    sessionStorage.removeItem('attendanceData');
     document.getElementById('attendanceForm').submit();
 }
 
@@ -212,6 +288,26 @@ function markAll(status) {
     background-color: #ffc107;
     border-color: #ffc107;
     color: #000;
+}
+
+/* Pagination styling */
+.pagination {
+    margin-bottom: 0;
+}
+
+.pagination .page-link {
+    color: #0d6efd;
+    border-color: #dee2e6;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+.pagination .page-item.disabled .page-link {
+    color: #6c757d;
+    background-color: #fff;
 }
 </style>
 @endpush

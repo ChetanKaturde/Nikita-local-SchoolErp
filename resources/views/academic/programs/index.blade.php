@@ -5,9 +5,9 @@
 @section('content')
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1><i class="bi bi-mortarboard me-2"></i>Program Management</h1>
+        <h1><i class="fas fa-graduation-cap me-2"></i>Program Management</h1>
         <a href="{{ route('academic.programs.create') }}" class="btn btn-primary">
-            <i class="bi bi-plus-circle"></i> Add New Program
+            <i class="fas fa-plus-circle"></i> Add New Program
         </a>
     </div>
 
@@ -66,9 +66,14 @@
                                     <td><code>{{ $program->code }}</code></td>
                                     <td>{{ $program->department->name ?? '—' }}</td>
                                     <td>
-                                        <span class="badge bg-info">
-                                            {{ ucfirst(str_replace('_', ' ', $program->program_type)) }}
-                                        </span>
+                                        @if(!empty($program->program_type))
+                                            <span class="badge bg-info">
+                                                <i class="fas fa-graduation-cap me-1"></i>
+                                                {{ ucfirst(str_replace('_', ' ', $program->program_type)) }}
+                                            </span>
+                                        @else
+                                            <span class="text-muted">—</span>
+                                        @endif
                                     </td>
                                     <td>{{ $program->duration_years }} years</td>
                                     <td>

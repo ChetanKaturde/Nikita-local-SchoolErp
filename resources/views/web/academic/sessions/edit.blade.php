@@ -53,7 +53,7 @@
                             class="form-control @error('start_date') is-invalid @enderror"
                             id="start_date"
                             name="start_date"
-                            value="{{ old('start_date', $session->start_date) }}"
+                            value="{{ old('start_date', $session->start_date ? \Carbon\Carbon::parse($session->start_date)->format('Y-m-d') : '') }}"
                             required
                         >
                         @error('start_date')
@@ -69,7 +69,7 @@
                             class="form-control @error('end_date') is-invalid @enderror"
                             id="end_date"
                             name="end_date"
-                            value="{{ old('end_date', $session->end_date) }}"
+                            value="{{ old('end_date', $session->end_date ? \Carbon\Carbon::parse($session->end_date)->format('Y-m-d') : '') }}"
                             required
                         >
                         @error('end_date')

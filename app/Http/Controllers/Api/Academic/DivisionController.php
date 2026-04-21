@@ -12,11 +12,38 @@ use Illuminate\Http\JsonResponse;
 class DivisionController extends Controller
 {
     /* ================================
+     * GET /api/divisions/public - Public access (for admission form)
+     * ================================ */
+    public function indexPublic(Request $request): JsonResponse
+    {
+        $query = Division::where('is_active', true);
+
+        // Filter by program_id if provided
+        if ($request->filled('program_id')) {
+            $query->where('program_id', $request->program_id);
+        }
+
+        $divisions = $query->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $divisions
+        ]);
+    }
+
+    /* ================================
      * GET /api/divisions
      * ================================ */
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        $divisions = Division::where('is_active', true)->get();
+        $query = Division::where('is_active', true);
+        
+        // Filter by program_id if provided
+        if ($request->filled('program_id')) {
+            $query->where('program_id', $request->program_id);
+        }
+        
+        $divisions = $query->get();
 
         return response()->json([
             'success' => true,

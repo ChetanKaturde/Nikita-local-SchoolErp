@@ -37,15 +37,20 @@ class StaffController extends Controller
             'employee_id' => 'required|unique:staff_profiles,employee_id',
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
-            'phone' => 'required|string|max:15',
-            'emergency_contact' => 'nullable|string|max:15',
-            'date_of_birth' => 'required|date',
+            'phone' => 'required|string|regex:/^[6-9]\d{9}$/',
+            'emergency_contact' => 'nullable|string|regex:/^[6-9]\d{9}$/',
+            'date_of_birth' => 'required|date|before:-18 years|after:-60 years',
             'gender' => 'required|in:male,female,other',
             'address' => 'required|string',
             'joining_date' => 'required|date',
             'designation' => 'required|string|max:100',
             'department_id' => 'required|exists:departments,id',
             'employment_type' => 'required|in:permanent,contract,part_time',
+        ], [
+            'phone.regex' => 'Phone number must be a 10-digit Indian mobile number starting with 6-9.',
+            'emergency_contact.regex' => 'Emergency contact must be a 10-digit Indian mobile number starting with 6-9.',
+            'date_of_birth.before' => 'Date of birth must indicate the person is at least 18 years old.',
+            'date_of_birth.after' => 'Date of birth must indicate the person is not older than 60 years.',
         ]);
 
         $user = User::create([
@@ -54,7 +59,7 @@ class StaffController extends Controller
             'password' => Hash::make($validated['password']),
         ]);
 
-        $user->assignRole('teacher');
+        $user->assignRole('staff');
 
         StaffProfile::create([
             'user_id' => $user->id,
@@ -93,20 +98,51 @@ class StaffController extends Controller
         $validated = $request->validate([
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
-            'phone' => 'required|string|max:15',
-            'emergency_contact' => 'nullable|string|max:15',
+            'phone' => 'required|string|regex:/^[6-9]\d{9}$/',
+            'emergency_contact' => 'nullable|string|regex:/^[6-9]\d{9}$/',
+            'date_of_birth' => 'required|date|before:-18 years|after:-60 years',
+            'gender' => 'required|in:male,female,other',
             'address' => 'required|string',
             'designation' => 'required|string|max:100',
             'department_id' => 'required|exists:departments,id',
             'employment_type' => 'required|in:permanent,contract,part_time',
             'status' => 'required|in:active,inactive,terminated',
+            'password' => 'nullable|string|min:8|confirmed',
+        ], [
+            'phone.regex' => 'Phone number must be a 10-digit Indian mobile number starting with 6-9.',
+            'emergency_contact.regex' => 'Emergency contact must be a 10-digit Indian mobile number starting with 6-9.',
+            'date_of_birth.before' => 'Date of birth must indicate the person is at least 18 years old.',
+            'date_of_birth.after' => 'Date of birth must indicate the person is not older than 60 years.',
         ]);
 
-        $staff->update($validated);
+        $updateData = [
+            'first_name' => $validated['first_name'],
+            'last_name' => $validated['last_name'],
+            'phone' => $validated['phone'],
+            'emergency_contact' => $validated['emergency_contact'] ?? null,
+            'date_of_birth' => $validated['date_of_birth'],
+            'gender' => $validated['gender'],
+            'address' => $validated['address'],
+            'designation' => $validated['designation'],
+            'department_id' => $validated['department_id'],
+            'employment_type' => $validated['employment_type'],
+            'status' => $validated['status'],
+        ];
 
-        $staff->user->update([
+        $staff->update($updateData);
+
+        $userData = [
             'name' => $validated['first_name'] . ' ' . $validated['last_name'],
-        ]);
+        ];
+
+        // Update password only if provided
+        if ($request->filled('password')) {
+            $userData['password'] = Hash::make($validated['password']);
+            $userData['temp_password'] = $validated['password']; // Update for admin view
+            $userData['password_generated_at'] = now();
+        }
+
+        $staff->user->update($userData);
 
         return redirect()->route('staff.index')
             ->with('success', 'Staff updated successfully!');

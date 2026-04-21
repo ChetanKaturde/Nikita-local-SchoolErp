@@ -6,7 +6,7 @@
 <div class="container-fluid">
     <div class="row mb-4">
         <div class="col-12">
-            <h2><i class="bi bi-file-earmark-arrow-up me-2"></i>Import Timetable</h2>
+            <h2><i class="fa fa-file-arrow-up me-2"></i>Import Timetable</h2>
             <p class="text-muted">Bulk import timetable from Excel file</p>
         </div>
     </div>
@@ -40,7 +40,7 @@
 
                         <div class="mb-3">
                             <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-upload"></i> Import Timetable
+                                <i class="fa fa-upload"></i> Import Timetable
                             </button>
                             <a href="{{ route('academic.timetable.index') }}" class="btn btn-secondary">
                                 Cancel
@@ -98,7 +98,7 @@
                     </table>
 
                     <div class="alert alert-info mt-3">
-                        <i class="bi bi-info-circle me-2"></i>
+                        <i class="fa fa-info-circle me-2"></i>
                         The system will automatically detect and prevent scheduling conflicts.
                     </div>
                 </div>
@@ -110,7 +110,7 @@
                 </div>
                 <div class="card-body">
                     <a href="#" class="btn btn-outline-primary btn-sm">
-                        <i class="bi bi-download"></i> Download Sample Excel
+                        <i class="fa fa-download"></i> Download Sample Excel
                     </a>
                 </div>
             </div>

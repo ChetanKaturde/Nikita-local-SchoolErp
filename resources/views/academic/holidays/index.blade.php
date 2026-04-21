@@ -2,6 +2,11 @@
 
 @section('title', 'Holiday Management')
 
+@php
+use Illuminate\Support\Facades\Auth;
+    $canManageHolidays = Auth::check() && in_array(Auth::user()->roles->first()->name ?? '', ['admin', 'principal', 'hod_commerce', 'hod_science', 'hod_management', 'hod_arts']);
+@endphp
+
 @section('content')
 <div class="container-fluid">
     <!-- Page Header -->
@@ -9,16 +14,18 @@
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h2><i class="bi bi-calendar-event me-2"></i>Holiday Management</h2>
+                    <h2><i class="fas fa-calendar-check me-2"></i>Holiday Management</h2>
                     <p class="text-muted mb-0">Manage school holidays and events</p>
                 </div>
                 <div class="d-flex gap-2">
                     <a href="{{ route('academic.timetable.table') }}" class="btn btn-outline-secondary">
                         <i class="bi bi-table"></i> Timetable
                     </a>
+                    @if($canManageHolidays)
                     <a href="{{ route('academic.holidays.create') }}" class="btn btn-primary">
                         <i class="bi bi-plus-circle"></i> Add Holiday
                     </a>
+                    @endif
                 </div>
             </div>
         </div>
@@ -170,6 +177,7 @@
                                     @endif
                                 </td>
                                 <td>
+                                    @if($canManageHolidays)
                                     <div class="btn-group btn-group-sm">
                                         <a href="{{ route('academic.holidays.edit', $holiday) }}" 
                                            class="btn btn-outline-warning" title="Edit">
@@ -184,6 +192,9 @@
                                             </button>
                                         </form>
                                     </div>
+                                    @else
+                                    <span class="text-muted">View Only</span>
+                                    @endif
                                 </td>
                             </tr>
                         @empty
@@ -193,9 +204,11 @@
                                         <i class="bi bi-inbox fs-1 d-block mb-2"></i>
                                         No holidays configured
                                     </div>
+                                    @if($canManageHolidays)
                                     <a href="{{ route('academic.holidays.create') }}" class="btn btn-primary mt-2">
                                         <i class="bi bi-plus-circle"></i> Add First Holiday
                                     </a>
+                                    @endif
                                 </td>
                             </tr>
                         @endforelse

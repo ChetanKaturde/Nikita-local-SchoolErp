@@ -6,6 +6,62 @@
 @php
     use Illuminate\Support\Facades\Storage;
 @endphp
+
+<style>
+    /* Enhanced Validation Error Styling */
+    .form-control.is-invalid,
+    .form-select.is-invalid {
+        border-color: #dc3545 !important;
+        border-width: 2px !important;
+        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+    }
+
+    .invalid-feedback {
+        color: #dc3545 !important;
+        font-weight: 600 !important;
+        font-size: 0.875rem !important;
+        margin-top: 0.25rem !important;
+        display: block !important;
+    }
+
+    .form-label {
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        color: #212529;
+    }
+
+    .required-field::after {
+        content: ' *';
+        color: #dc3545;
+        font-weight: 700;
+    }
+
+    /* Error Alert Styling */
+    .error-summary {
+        background-color: #f8d7da;
+        border: 2px solid #dc3545;
+        color: #721c24;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .error-summary i {
+        font-size: 1.2rem;
+        margin-right: 0.5rem;
+    }
+
+    .error-summary ul {
+        margin-bottom: 0;
+        padding-left: 1.5rem;
+    }
+
+    .error-summary li {
+        color: #721c24;
+        font-weight: 500;
+    }
+</style>
+
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
@@ -15,6 +71,20 @@
                     <i class="bi bi-arrow-left"></i> Back to Student
                 </a>
             </div>
+
+            @if ($errors->any())
+            <div class="error-summary alert alert-danger" role="alert">
+                <h5 class="mb-2">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    Please correct {{ $errors->count() }} error{{ $errors->count() > 1 ? 's' : '' }} below:
+                </h5>
+                <ul>
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+            @endif
 
             <form action="{{ route('dashboard.students.guardians.update', [$student, $guardian]) }}" method="POST" enctype="multipart/form-data">
                 @csrf
@@ -127,16 +197,20 @@
                             <div class="card-body">
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
-                                        <label for="mobile_number" class="form-label">Mobile Number <span class="text-danger">*</span></label>
+                                        <label for="mobile_number" class="form-label required-field">Mobile Number</label>
                                         <input type="tel" class="form-control @error('mobile_number') is-invalid @enderror" 
-                                               id="mobile_number" name="mobile_number" value="{{ old('mobile_number', $guardian->mobile_number) }}" required>
+                                               id="mobile_number" name="mobile_number" value="{{ old('mobile_number', $guardian->mobile_number) }}" 
+                                               required pattern="[6-9]\d{9}" maxlength="10" minlength="10"
+                                               placeholder="Enter 10-digit mobile (start with 6-9)"
+                                               title="Mobile number must be 10 digits starting with 6-9 (e.g., 9876543210)">
+                                        <small class="text-muted">Must be 10 digits, starting with 6-9 (e.g., 9876543210)</small>
                                         @error('mobile_number')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <label for="email" class="form-label">Email Address</label>
-                                        <input type="email" class="form-control @error('email') is-invalid @enderror" 
+                                        <input type="email" class="form-control @error('email') is-invalid @enderror"
                                                id="email" name="email" value="{{ old('email', $guardian->email) }}">
                                         @error('email')
                                             <div class="invalid-feedback">{{ $message }}</div>

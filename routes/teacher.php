@@ -26,6 +26,10 @@ Route::middleware(['auth', 'role:admin|teacher|class_teacher|subject_teacher|hod
     Route::get('/profile/edit', [DashboardController::class, 'editProfile'])->name('profile.edit');
     Route::put('/profile', [DashboardController::class, 'updateProfile'])->name('profile.update');
 
+    // Teacher Settings
+    Route::get('/settings', [DashboardController::class, 'settings'])->name('settings');
+    Route::put('/settings', [DashboardController::class, 'updateSettings'])->name('settings.update');
+
     // Assigned Divisions
     Route::get('/divisions', [DashboardController::class, 'divisions'])->name('divisions.index');
     Route::get('/divisions/{divisionId}/students', [DashboardController::class, 'divisionStudents'])->name('divisions.students');
@@ -59,15 +63,21 @@ Route::middleware(['auth', 'role:admin|teacher|class_teacher|subject_teacher|hod
         // Mark Attendance (for specific timetable) - must be before wildcard routes
         Route::get('/create/{timetableId}', [AttendanceController::class, 'create'])->name('create');
         Route::post('/store/{timetableId}', [AttendanceController::class, 'store'])->name('store');
+        // PUT route for updating attendance (uses same store method)
+        Route::match(['put', 'post'], '/{timetableId}', [AttendanceController::class, 'store'])->name('update');
 
         // Attendance History
         Route::get('/history', [AttendanceController::class, 'history'])->name('history');
+        
+        // Download Reports
+        Route::get('/history/download-excel', [AttendanceController::class, 'downloadExcel'])->name('history.download-excel');
+        Route::get('/history/download-pdf', [AttendanceController::class, 'downloadPDF'])->name('history.download-pdf');
 
         // Attendance Report
         Route::get('/report', [AttendanceController::class, 'report'])->name('report');
 
-        // Edit Attendance - wildcard routes at the end
-        Route::get('/{attendanceId}/edit', [AttendanceController::class, 'edit'])->name('edit');
-        Route::put('/{attendanceId}', [AttendanceController::class, 'update'])->name('update');
+        // Edit single attendance record - wildcard routes at the end
+        Route::get('/record/{attendanceId}/edit', [AttendanceController::class, 'edit'])->name('record.edit');
+        Route::put('/record/{attendanceId}', [AttendanceController::class, 'update'])->name('record.update');
     });
 });

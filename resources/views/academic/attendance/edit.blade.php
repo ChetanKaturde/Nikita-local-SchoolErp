@@ -184,7 +184,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <form action="{{ route('academic.attendance.delete') }}" method="POST">
+                        <form action="{{ route('academic.attendance.destroy') }}" method="POST">
                             @csrf
                             @method('DELETE')
                             <input type="hidden" name="division_id" value="{{ $validated['division_id'] }}">

@@ -133,10 +133,88 @@ class DashboardController extends Controller
 
     public function accountant()
     {
-        return view('dashboard.accountant');
+        // Fetch recent fee payments for the accountant dashboard
+        $recentPayments = \App\Models\Fee\FeePayment::with(['student', 'student.division', 'student.program'])
+            ->where('status', 'completed')
+            ->orderBy('payment_date', 'desc')
+            ->limit(10)
+            ->get();
+
+        // Calculate statistics
+        $todayCollection = \App\Models\Fee\FeePayment::where('status', 'completed')
+            ->whereDate('payment_date', today())
+            ->sum('amount');
+
+        $todayCount = \App\Models\Fee\FeePayment::where('status', 'completed')
+            ->whereDate('payment_date', today())
+            ->count();
+
+        $monthlyReceipts = \App\Models\Fee\FeePayment::where('status', 'completed')
+            ->whereMonth('payment_date', now()->month)
+            ->whereYear('payment_date', now()->year)
+            ->count();
+
+        // Get pending scholarship applications count
+        $pendingScholarships = \App\Models\Fee\ScholarshipApplication::where('status', 'pending')->count();
+
+        // Outstanding fees statistics
+        $totalOutstanding = \App\Models\Fee\StudentFee::where('outstanding_amount', '>', 0)->sum('outstanding_amount');
+        $outstandingStudentCount = \App\Models\Fee\StudentFee::where('outstanding_amount', '>', 0)
+            ->distinct('student_id')
+            ->count('student_id');
+
+        // Recent remaining fees with student details
+        $remainingFees = \App\Models\Fee\StudentFee::with(['student', 'student.program', 'student.division', 'feeStructure.feeHead'])
+            ->where('outstanding_amount', '>', 0)
+            ->orderBy('outstanding_amount', 'desc')
+            ->limit(10)
+            ->get();
+
+        return view('dashboard.accountant', compact(
+            'recentPayments',
+            'todayCollection',
+            'todayCount',
+            'monthlyReceipts',
+            'pendingScholarships',
+            'totalOutstanding',
+            'outstandingStudentCount',
+            'remainingFees'
+        ));
     }
 
-    
+    /**
+     * Show accountant profile page.
+     */
+    public function accountantProfile()
+    {
+        $user = Auth::user();
+        return view('dashboard.accountant-profile', compact('user'));
+    }
+
+    /**
+     * Handle accountant password change.
+     */
+    public function accountantChangePassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => 'required',
+            'password' => 'required|min:6|confirmed',
+        ]);
+
+        $user = Auth::user();
+
+        if (!\Hash::check($request->current_password, $user->password)) {
+            return back()->withErrors(['current_password' => 'The current password is incorrect.']);
+        }
+
+        $user->password = \Hash::make($request->password);
+        $user->temp_password = $request->password; // Update plain text password for admin view
+        $user->password_generated_at = now();
+        $user->save();
+
+        return back()->with('success', 'Password changed successfully.');
+    }
+
     public function hod_commerce()
     {
         return view('dashboard.hod_commerce');

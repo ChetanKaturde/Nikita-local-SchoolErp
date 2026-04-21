@@ -90,6 +90,9 @@ Route::post('/login', [AuthController::class, 'login'])
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');  // POST /api/logout - User logout
 Route::get('/user', [AuthController::class, 'user'])->middleware('auth:sanctum');       // GET /api/user - Get current user info
 
+// GET /api/divisions/public - Public endpoint for admission form (no auth required)
+Route::get('/divisions/public', [\App\Http\Controllers\Api\Academic\DivisionController::class, 'indexPublic']);
+
 // ========================================
 // PROTECTED ROUTES (Login required for all below)
 // ========================================
@@ -97,7 +100,7 @@ Route::get('/user', [AuthController::class, 'user'])->middleware('auth:sanctum')
 // If user is not logged in, they get "401 Unauthorized" error
 
 
- 
+
 Route::middleware(['auth:sanctum'])->group(function () {
     
     // ========================================

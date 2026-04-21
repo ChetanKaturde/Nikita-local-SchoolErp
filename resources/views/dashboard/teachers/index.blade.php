@@ -66,6 +66,7 @@
                                     @endif
                                 </a>
                             </th>
+                            <th>Password</th>
                             <th>Division Assignment</th>
                             <th>
                                 <a href="?sort=created_at&dir={{ $sortDir === 'asc' ? 'desc' : 'asc' }}" class="text-decoration-none text-dark">
@@ -93,6 +94,33 @@
                                     </div>
                                 </td>
                                 <td>{{ $teacher->email }}</td>
+                                <td>
+                                    @if($teacher->temp_password)
+                                        <div class="input-group input-group-sm" style="max-width: 200px;">
+                                            <input type="password" class="form-control font-monospace" value="{{ $teacher->temp_password }}"
+                                                   id="teacher-password-{{ $teacher->id }}" readonly style="background-color: #f8f9fa; letter-spacing: 2px;">
+                                            <button class="btn btn-outline-success" type="button"
+                                                    onclick="toggleTeacherPassword('teacher-password-{{ $teacher->id }}')" title="Show/Hide">
+                                                <i class="bi bi-eye" id="teacher-eye-{{ $teacher->id }}"></i>
+                                            </button>
+                                            <button class="btn btn-outline-primary" type="button"
+                                                    onclick="copyTeacherPassword('teacher-password-{{ $teacher->id }}')" title="Copy">
+                                                <i class="bi bi-clipboard"></i>
+                                            </button>
+                                        </div>
+                                        <small class="text-muted">
+                                            <i class="bi bi-clock"></i> 
+                                            Updated: {{ $teacher->password_generated_at ? \Carbon\Carbon::parse($teacher->password_generated_at)->diffForHumans() : 'N/A' }}
+                                        </small>
+                                        @if($teacher->password_generated_at && $teacher->password_generated_at->diffInMinutes() < 60)
+                                            <small class="text-success d-block">
+                                                <i class="bi bi-check-circle"></i> Recently set by admin
+                                            </small>
+                                        @endif
+                                    @else
+                                        <span class="badge bg-warning">No Password Set</span>
+                                    @endif
+                                </td>
                                 <td>
                                     @if($teacher->assignedDivision)
                                         <span class="badge bg-success">{{ $teacher->assignedDivision->division_name }}</span>
@@ -153,3 +181,46 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+function toggleTeacherPassword(inputId) {
+    const input = document.getElementById(inputId);
+    const eyeIcon = document.getElementById('teacher-eye-' + inputId.replace('teacher-password-', ''));
+    
+    if (input.type === 'password') {
+        input.type = 'text';
+        if (eyeIcon) {
+            eyeIcon.classList.remove('bi-eye');
+            eyeIcon.classList.add('bi-eye-slash');
+        }
+    } else {
+        input.type = 'password';
+        if (eyeIcon) {
+            eyeIcon.classList.remove('bi-eye-slash');
+            eyeIcon.classList.add('bi-eye');
+        }
+    }
+}
+
+function copyTeacherPassword(inputId) {
+    const input = document.getElementById(inputId);
+    input.select();
+    input.setSelectionRange(0, 99999);
+    navigator.clipboard.writeText(input.value).then(function() {
+        // Show success toast
+        const toast = document.createElement('div');
+        toast.className = 'alert alert-success position-fixed bottom-0 end-0 m-3';
+        toast.textContent = 'Password copied to clipboard!';
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }, function(err) {
+        const toast = document.createElement('div');
+        toast.className = 'alert alert-danger position-fixed bottom-0 end-0 m-3';
+        toast.textContent = 'Failed to copy password';
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    });
+}
+</script>
+@endpush

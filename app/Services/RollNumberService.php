@@ -30,7 +30,7 @@ class RollNumberService
             );
             
             // Get program code
-            $program = DB::table('programs')->where('id', $programId)->first();
+            $program = DB::table('standards')->where('id', $programId)->first();
             
             return sprintf('%s/%s/%s/%03d', 
                 $academicYear, 

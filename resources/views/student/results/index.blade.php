@@ -42,22 +42,29 @@
                                     <td class="text-center">{{ $result->total_marks }}</td>
                                     <td class="text-center">
                                         @php
-                                            $percentage = ($result->marks_obtained / $result->total_marks) * 100;
+                                            // Handle case where total_marks might be 0 or null
+                                            $percentage = 0;
                                             $grade = '';
-                                            if ($percentage >= 90) $grade = 'A+';
-                                            elseif ($percentage >= 80) $grade = 'A';
-                                            elseif ($percentage >= 70) $grade = 'B+';
-                                            elseif ($percentage >= 60) $grade = 'B';
-                                            elseif ($percentage >= 50) $grade = 'C';
-                                            elseif ($percentage >= 40) $grade = 'D';
-                                            else $grade = 'F';
+                                            if ($result->total_marks > 0 && $result->marks_obtained !== null) {
+                                                $percentage = ($result->marks_obtained / $result->total_marks) * 100;
+                                                
+                                                if ($percentage >= 90) $grade = 'A+';
+                                                elseif ($percentage >= 80) $grade = 'A';
+                                                elseif ($percentage >= 70) $grade = 'B+';
+                                                elseif ($percentage >= 60) $grade = 'B';
+                                                elseif ($percentage >= 50) $grade = 'C';
+                                                elseif ($percentage >= 40) $grade = 'D';
+                                                else $grade = 'F';
+                                            } else {
+                                                $grade = 'N/A';
+                                            }
                                             
                                             $gradeClass = $percentage >= 60 ? 'success' : ($percentage >= 40 ? 'warning' : 'danger');
                                         @endphp
                                         <span class="badge bg-{{ $gradeClass }}">{{ $grade }}</span>
                                     </td>
                                     <td class="text-center">
-                                        @if($percentage >= 40)
+                                        @if($result->total_marks > 0 && $result->marks_obtained !== null && $percentage >= 40)
                                             <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Pass</span>
                                         @else
                                             <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i>Fail</span>

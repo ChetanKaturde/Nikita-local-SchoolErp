@@ -113,7 +113,7 @@ class SubjectController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'code' => 'required|string|max:20|unique:subjects,code',
-            'program_id' => 'required|exists:programs,id',
+            'program_id' => 'required|exists:standards,id',
             'academic_year_id' => 'required|exists:academic_sessions,id',
             'semester' => 'required|integer|min:1|max:8',
             'type' => 'required|in:theory,practical,both',
@@ -174,7 +174,7 @@ class SubjectController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'sometimes|required|string|max:255',
             'code' => 'sometimes|required|string|max:20|unique:subjects,code,' . $id,
-            'program_id' => 'sometimes|required|exists:programs,id',
+            'program_id' => 'sometimes|required|exists:standards,id',
             'academic_year_id' => 'sometimes|required|exists:academic_sessions,id',
             'semester' => 'sometimes|required|integer|min:1|max:8',
             'type' => 'sometimes|required|in:theory,practical,both',

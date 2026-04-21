@@ -6,15 +6,15 @@
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1>
-            <i class="bi bi-mortarboard me-2"></i>
+            <i class="fas fa-graduation-cap me-2"></i>
             {{ $program->name }}
         </h1>
         <div class="d-flex gap-2">
             <a href="{{ route('academic.programs.edit', $program) }}" class="btn btn-warning">
-                <i class="bi bi-pencil-square"></i> Edit Program
+                <i class="fas fa-edit"></i> Edit Program
             </a>
             <a href="{{ route('academic.programs.index') }}" class="btn btn-secondary">
-                <i class="bi bi-arrow-left"></i> Back to Programs
+                <i class="fas fa-arrow-left"></i> Back to Programs
             </a>
         </div>
     </div>
@@ -31,7 +31,7 @@
         <div class="col-md-6">
             <div class="card shadow-sm mb-4">
                 <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Basic Information</h5>
+                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Basic Information</h5>
                 </div>
                 <div class="card-body">
                     <p><strong>Full Name:</strong> {{ $program->name }}</p>
@@ -58,13 +58,18 @@
         <div class="col-md-6">
             <div class="card shadow-sm mb-4">
                 <div class="card-header bg-success text-white">
-                    <h5 class="mb-0"><i class="bi bi-calendar-check me-2"></i>Academic Details</h5>
+                    <h5 class="mb-0"><i class="fas fa-calendar-check me-2"></i>Academic Details</h5>
                 </div>
                 <div class="card-body">
                     <p><strong>Program Type:</strong> 
-                        <span class="badge bg-primary">
-                            {{ ucfirst(str_replace('_', ' ', $program->program_type)) }}
-                        </span>
+                        @if(!empty($program->program_type))
+                            <span class="badge bg-primary">
+                                <i class="fas fa-graduation-cap me-1"></i>
+                                {{ ucfirst(str_replace('_', ' ', $program->program_type)) }}
+                            </span>
+                        @else
+                            <span class="text-muted">—</span>
+                        @endif
                     </p>
                     <p><strong>Duration:</strong> {{ $program->duration_years }} years</p>
                     <p><strong>Total Semesters:</strong> {{ $program->total_semesters ?? ($program->duration_years * 2) }}</p>
@@ -80,7 +85,7 @@
         <div class="col-md-6">
             <div class="card shadow-sm mb-4">
                 <div class="card-header bg-warning text-dark">
-                    <h5 class="mb-0"><i class="bi bi-ui-checks-grid me-2"></i>Grading System</h5>
+                    <h5 class="mb-0"><i class="fas fa-clipboard-list me-2"></i>Grading System</h5>
                 </div>
                 <div class="card-body">
                     <p><strong>Default Grade Scale:</strong> {{ $program->default_grade_scale_name }}</p>
@@ -91,7 +96,7 @@
         <div class="col-md-6">
             <div class="card shadow-sm mb-4">
                 <div class="card-header bg-info text-white">
-                    <h5 class="mb-0"><i class="bi bi-people me-2"></i>Enrollment Statistics</h5>
+                    <h5 class="mb-0"><i class="fas fa-users me-2"></i>Enrollment Statistics</h5>
                 </div>
                 <div class="card-body">
                     <p><strong>Enrolled Students:</strong> 

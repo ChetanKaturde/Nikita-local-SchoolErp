@@ -139,4 +139,10 @@ class Division extends Model
     {
         return $this->hasCapacity(count($studentIds));
     }
+
+    // Accessor for name attribute used in forms
+    public function getNameAttribute(): string
+    {
+        return $this->division_name;
+    }
 }

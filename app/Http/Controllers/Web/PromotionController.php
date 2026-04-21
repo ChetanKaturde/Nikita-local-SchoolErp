@@ -168,7 +168,7 @@ class PromotionController extends Controller
             'student_ids' => 'required|array|min:1',
             'student_ids.*' => 'integer|exists:students,id',
             'to_session_id' => 'required|integer|exists:academic_sessions,id',
-            'to_program_id' => 'required|integer|exists:programs,id',
+            'to_program_id' => 'required|integer|exists:standards,id',
             'to_division_id' => 'required|integer|exists:divisions,id',
             'to_academic_year' => 'required|string',
         ]);
@@ -241,7 +241,7 @@ class PromotionController extends Controller
             'student_ids' => 'required|array|min:1',
             'student_ids.*' => 'integer|exists:students,id',
             'to_session_id' => 'required|integer|exists:academic_sessions,id',
-            'to_program_id' => 'required|integer|exists:programs,id',
+            'to_program_id' => 'required|integer|exists:standards,id',
             'to_division_id' => 'required|integer|exists:divisions,id',
             'to_academic_year' => 'required|string',
         ]);
@@ -309,7 +309,7 @@ class PromotionController extends Controller
     {
         $request->validate([
             'to_session_id' => 'required|integer|exists:academic_sessions,id',
-            'to_program_id' => 'required|integer|exists:programs,id',
+            'to_program_id' => 'required|integer|exists:standards,id',
             'to_division_id' => 'required|integer|exists:divisions,id',
             'to_academic_year' => 'required|string',
         ]);

@@ -47,8 +47,15 @@ class DivisionController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        // Get current academic year
+        $academicYear = \App\Models\Academic\AcademicYear::where('is_active', true)->first();
+        
+        if (!$academicYear) {
+            return back()->with('error', 'No active academic year found. Please set an academic year first.');
+        }
+
         $validated = $request->validate([
-            'program_id' => 'required|exists:programs,id',
+            'program_id' => 'required|exists:standards,id',
             'session_id' => 'required|exists:academic_sessions,id',
             'division_name' => [
                 'required',
@@ -69,6 +76,9 @@ class DivisionController extends Controller
         ], [
             'division_name.unique' => 'This division name already exists for the selected program and session. Please choose a different name.'
         ]);
+
+        // Add academic_year_id to the validated data
+        $validated['academic_year_id'] = $academicYear->id;
 
         Division::create($validated);
 
@@ -93,7 +103,7 @@ class DivisionController extends Controller
     public function update(Request $request, Division $division): RedirectResponse
     {
         $validated = $request->validate([
-            'program_id' => 'required|exists:programs,id',
+            'program_id' => 'required|exists:standards,id',
             'session_id' => 'required|exists:academic_sessions,id',
             'division_name' => [
                 'required',

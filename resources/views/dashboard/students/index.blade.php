@@ -9,7 +9,7 @@
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h3 class="mb-1"><i class="bi bi-people me-2 text-primary"></i> Students Management</h3>
+                    <h3 class="mb-1"><i class="fas fa-user-graduate me-2 text-primary"></i> Students Management</h3>
                     <p class="text-muted mb-0">Manage student records, admissions, and academic information</p>
                 </div>
                 <div class="d-flex gap-2">
@@ -130,7 +130,7 @@
                     <div class="input-group">
                         <input type="text" name="search" class="form-control" placeholder="Name, Email, Roll No..." value="{{ request('search') }}">
                         <button class="btn btn-outline-secondary" type="submit">
-                            <i class="bi bi-search"></i>
+                            <i class="fas fa-search"></i>
                         </button>
                     </div>
                 </div>
@@ -186,6 +186,7 @@
                                     </a>
                                 </th>
                                 <th>Contact</th>
+                                <th>Password</th>
                                 <th>
                                     <a href="?sort=student_status&dir={{ $sortDir === 'asc' ? 'desc' : 'asc' }}" class="text-decoration-none text-dark">
                                         Status
@@ -194,6 +195,7 @@
                                         @endif
                                     </a>
                                 </th>
+                                <th>Fees</th>
                                 <th class="text-end" style="width: 120px;">Actions</th>
                             </tr>
                         </thead>
@@ -205,13 +207,13 @@
                                     </td>
                                     <td class="text-center">
                                     @if($student->photo_path)
-                                        <img src="{{ asset('storage/' . $student->photo_path) }}" 
+                                        <img src="{{ route('documents.students.document', [$student, 'photo']) }}" 
                                              class="rounded-circle" 
                                              style="width: 40px; height: 40px; object-fit: cover;">
                                     @else
                                         <div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center" 
                                              style="width: 40px; height: 40px;">
-                                            <i class="bi bi-person text-white"></i>
+                                            <i class="fas fa-user text-white"></i>
                                         </div>
                                     @endif
                                 </td>
@@ -250,9 +252,48 @@
                                     </div>
                                 </td>
                                 <td>
+                                    @if($student->user && $student->user->temp_password)
+                                        <div class="input-group input-group-sm" style="max-width: 200px;">
+                                            <input type="password" class="form-control font-monospace" value="{{ $student->user->temp_password }}" 
+                                                   id="student-password-{{ $student->id }}" readonly style="background-color: #f8f9fa; letter-spacing: 2px;">
+                                            <button class="btn btn-outline-success" type="button" 
+                                                    onclick="toggleStudentPassword('student-password-{{ $student->id }}')" title="Show/Hide">
+                                                <i class="fas fa-eye" id="student-eye-{{ $student->id }}"></i>
+                                            </button>
+                                            <button class="btn btn-outline-primary" type="button" 
+                                                    onclick="copyStudentPassword('student-password-{{ $student->id }}')" title="Copy">
+                                                <i class="fas fa-clipboard"></i>
+                                            </button>
+                                        </div>
+                                        <small class="text-muted">Generated: {{ $student->user->password_generated_at ? \Carbon\Carbon::parse($student->user->password_generated_at)->diffForHumans() : 'N/A' }}</small>
+                                    @else
+                                        <span class="badge bg-warning">No Password Set</span>
+                                    @endif
+                                </td>
+                                <td>
                                     <span class="badge bg-{{ $student->student_status === 'active' ? 'success' : ($student->student_status === 'graduated' ? 'info' : 'secondary') }}">
                                         {{ ucfirst($student->student_status) }}
                                     </span>
+                                </td>
+                                <td>
+                                    @php
+                                        $totalPaid = $student->fees->sum('paid_amount');
+                                        $totalOutstanding = $student->fees->sum('outstanding_amount');
+                                        $hasFees = $student->fees->count() > 0;
+                                    @endphp
+                                    @if($hasFees)
+                                        <div class="small">
+                                            <span class="text-success">Paid: ₹{{ number_format($totalPaid, 0) }}</span><br>
+                                            <span class="text-danger">Due: ₹{{ number_format($totalOutstanding, 0) }}</span>
+                                        </div>
+                                        @if($totalOutstanding > 0)
+                                            <span class="badge bg-warning">Pending</span>
+                                        @else
+                                            <span class="badge bg-success">Settled</span>
+                                        @endif
+                                    @else
+                                        <span class="text-muted">No Fees</span>
+                                    @endif
                                 </td>
                                 <td class="text-end">
                                     <div class="d-flex gap-1 justify-content-end">
@@ -278,7 +319,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="text-center py-5">
+                                <td colspan="9" class="text-center py-5">
                                     <div class="text-muted">
                                         <i class="bi bi-people fs-1 mb-3 d-block"></i>
                                         <h5>No students found</h5>
@@ -300,11 +341,11 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <small class="text-muted">
-                                Showing {{ $students->firstItem() }} to {{ $students->lastItem() }} of {{ $students->total() }} results
+                                Showing {{ $students->firstItem() ?? 0 }} to {{ $students->lastItem() ?? 0 }} of {{ $students->total() }} results
                             </small>
                         </div>
                         <div>
-                            {{ $students->appends(request()->query())->links() }}
+                            {{ $students->appends(request()->query())->links('pagination::bootstrap-5') }}
                         </div>
                     </div>
                 </div>
@@ -356,6 +397,44 @@ function confirmBulkAction() {
     if (confirm(confirmMessage)) {
         document.getElementById('bulkActionForm').submit();
     }
+}
+
+function toggleStudentPassword(inputId) {
+    const input = document.getElementById(inputId);
+    const eyeIcon = document.getElementById('student-eye-' + inputId.replace('student-password-', ''));
+    
+    if (input.type === 'password') {
+        input.type = 'text';
+        if (eyeIcon) {
+            eyeIcon.classList.remove('bi-eye');
+            eyeIcon.classList.add('bi-eye-slash');
+        }
+    } else {
+        input.type = 'password';
+        if (eyeIcon) {
+            eyeIcon.classList.remove('bi-eye-slash');
+            eyeIcon.classList.add('bi-eye');
+        }
+    }
+}
+
+function copyStudentPassword(inputId) {
+    const input = document.getElementById(inputId);
+    input.select();
+    input.setSelectionRange(0, 99999);
+    navigator.clipboard.writeText(input.value).then(function() {
+        const toast = document.createElement('div');
+        toast.className = 'alert alert-success position-fixed bottom-0 end-0 m-3';
+        toast.textContent = 'Password copied to clipboard!';
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }, function(err) {
+        const toast = document.createElement('div');
+        toast.className = 'alert alert-danger position-fixed bottom-0 end-0 m-3';
+        toast.textContent = 'Failed to copy password';
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    });
 }
 </script>
 @endsection

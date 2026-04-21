@@ -19,8 +19,8 @@
                 <div class="card-body text-center">
                     <i class="bi bi-cash-stack fa-3x mb-3"></i>
                     <h5>Fee Collection (Today)</h5>
-                    <h3>₹45,000</h3>
-                    <p class="mb-0"><small>15 payments received</small></p>
+                    <h3>₹{{ number_format($todayCollection ?? 0, 2) }}</h3>
+                    <p class="mb-0"><small>{{ $todayCount ?? 0 }} payments received</small></p>
                 </div>
             </div>
         </div>
@@ -30,8 +30,8 @@
                 <div class="card-body text-center">
                     <i class="bi bi-exclamation-triangle fa-3x mb-3"></i>
                     <h5>Outstanding Fees</h5>
-                    <h3>₹2,50,000</h3>
-                    <p class="mb-0"><small>85 students pending</small></p>
+                    <h3>₹{{ number_format($totalOutstanding ?? 0, 2) }}</h3>
+                    <p class="mb-0"><small>{{ $outstandingStudentCount ?? 0 }} students pending</small></p>
                 </div>
             </div>
         </div>
@@ -41,7 +41,7 @@
                 <div class="card-body text-center">
                     <i class="bi bi-receipt fa-3x mb-3"></i>
                     <h5>Receipts Generated</h5>
-                    <h3>150</h3>
+                    <h3>{{ $monthlyReceipts ?? 0 }}</h3>
                     <p class="mb-0"><small>This month</small></p>
                 </div>
             </div>
@@ -52,12 +52,32 @@
                 <div class="card-body text-center">
                     <i class="bi bi-award fa-3x mb-3"></i>
                     <h5>Scholarships</h5>
-                    <h3>25</h3>
-                    <p class="mb-0"><small>12 pending approval</small></p>
+                    <h3>{{ $pendingScholarships ?? 0 }}</h3>
+                    <p class="mb-0"><small>pending approval</small></p>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Pending Scholarship Applications -->
+    @if(($pendingScholarships ?? 0) > 0)
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-warning">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 text-warning"><i class="bi bi-file-earmark-check me-2"></i>Pending Scholarship Applications</h5>
+                    <a href="{{ route('fees.scholarship-applications.index') }}" class="btn btn-sm btn-warning">View All</a>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">There are <strong>{{ $pendingScholarships }}</strong> scholarship applications waiting for approval.</p>
+                    <a href="{{ route('fees.scholarship-applications.index') }}" class="btn btn-outline-warning">
+                        <i class="bi bi-check-circle me-1"></i>Review Applications
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
 
     <!-- Quick Actions -->
     <div class="row mb-4">
@@ -117,45 +137,50 @@
                                 </tr>
                             </thead>
                             <tbody>
+                                @forelse($recentPayments as $payment)
                                 <tr>
-                                    <td>{{ today()->format('d M Y') }}</td>
-                                    <td>John Doe</td>
-                                    <td>ADM2024001</td>
-                                    <td>₹5,000</td>
-                                    <td><span class="badge bg-success">Cash</span></td>
-                                    <td><span class="badge bg-success">Paid</span></td>
+                                    <td>{{ $payment->payment_date->format('d M Y') }}</td>
+                                    <td>{{ $payment->student->first_name ?? 'N/A' }} {{ $payment->student->last_name ?? '' }}</td>
+                                    <td>{{ $payment->student->admission_number ?? 'N/A' }}</td>
+                                    <td>₹{{ number_format($payment->amount, 2) }}</td>
                                     <td>
-                                        <a href="#" class="btn btn-sm btn-outline-primary">
-                                            <i class="bi bi-download"></i>
-                                        </a>
+                                        @if($payment->payment_mode == 'cash')
+                                            <span class="badge bg-success">Cash</span>
+                                        @elseif($payment->payment_mode == 'online')
+                                            <span class="badge bg-info">Online</span>
+                                        @elseif($payment->payment_mode == 'bank_transfer')
+                                            <span class="badge bg-primary">Bank Transfer</span>
+                                        @else
+                                            <span class="badge bg-secondary">{{ ucfirst($payment->payment_mode) }}</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if($payment->status == 'completed')
+                                            <span class="badge bg-success">Paid</span>
+                                        @elseif($payment->status == 'pending')
+                                            <span class="badge bg-warning">Pending</span>
+                                        @else
+                                            <span class="badge bg-danger">Failed</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if($payment->status == 'completed')
+                                            <a href="{{ route('fees.payments.download', $payment->id) }}" class="btn btn-sm btn-outline-primary" title="Download Receipt">
+                                                <i class="bi bi-download"></i>
+                                            </a>
+                                        @else
+                                            <span class="text-muted">—</span>
+                                        @endif
                                     </td>
                                 </tr>
+                                @empty
                                 <tr>
-                                    <td>{{ today()->format('d M Y') }}</td>
-                                    <td>Jane Smith</td>
-                                    <td>ADM2024002</td>
-                                    <td>₹8,000</td>
-                                    <td><span class="badge bg-info">Online</span></td>
-                                    <td><span class="badge bg-success">Paid</span></td>
-                                    <td>
-                                        <a href="#" class="btn btn-sm btn-outline-primary">
-                                            <i class="bi bi-download"></i>
-                                        </a>
+                                    <td colspan="7" class="text-center text-muted py-4">
+                                        <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                                        No recent payments found
                                     </td>
                                 </tr>
-                                <tr>
-                                    <td>{{ today()->format('d M Y') }}</td>
-                                    <td>Mike Johnson</td>
-                                    <td>ADM2024003</td>
-                                    <td>₹3,500</td>
-                                    <td><span class="badge bg-success">Cash</span></td>
-                                    <td><span class="badge bg-success">Paid</span></td>
-                                    <td>
-                                        <a href="#" class="btn btn-sm btn-outline-primary">
-                                            <i class="bi bi-download"></i>
-                                        </a>
-                                    </td>
-                                </tr>
+                                @endforelse
                             </tbody>
                         </table>
                     </div>
@@ -164,13 +189,84 @@
         </div>
     </div>
 
-    <!-- Pending Scholarship Applications -->
-    <div class="row">
+    <!-- Remaining Fees of Students -->
+    <div class="row mb-4">
         <div class="col-12">
             <div class="card">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="bi bi-file-earmark-check me-2"></i>Pending Scholarship Applications</h5>
-                    <a href="{{ route('fees.scholarship-applications.index') }}" class="btn btn-sm btn-primary">View All</a>
+                    <h5 class="mb-0"><i class="bi bi-exclamation-triangle me-2"></i>Remaining Fees of Students</h5>
+                    <a href="{{ route('fees.outstanding.index') }}" class="btn btn-sm btn-warning">View All Outstanding</a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Student</th>
+                                    <th>Admission No</th>
+                                    <th>Program</th>
+                                    <th>Division</th>
+                                    <th>Fee Type</th>
+                                    <th>Total Fee</th>
+                                    <th>Paid</th>
+                                    <th>Remaining</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($remainingFees as $fee)
+                                <tr>
+                                    <td>
+                                        <strong>{{ $fee->student->first_name ?? 'N/A' }} {{ $fee->student->last_name ?? '' }}</strong>
+                                    </td>
+                                    <td>{{ $fee->student->admission_number ?? 'N/A' }}</td>
+                                    <td>{{ $fee->student->program->name ?? 'N/A' }}</td>
+                                    <td>{{ $fee->student->division->name ?? 'N/A' }}</td>
+                                    <td>{{ $fee->feeStructure->feeHead->name ?? 'N/A' }}</td>
+                                    <td>₹{{ number_format($fee->final_amount, 2) }}</td>
+                                    <td><span class="text-success">₹{{ number_format($fee->paid_amount, 2) }}</span></td>
+                                    <td><strong class="text-danger">₹{{ number_format($fee->outstanding_amount, 2) }}</strong></td>
+                                    <td>
+                                        @if($fee->status === 'pending')
+                                            <span class="badge bg-danger">Pending</span>
+                                        @elseif($fee->status === 'partial')
+                                            <span class="badge bg-warning">Partial</span>
+                                        @else
+                                            <span class="badge bg-secondary">{{ ucfirst($fee->status) }}</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="9" class="text-center text-muted py-4">
+                                        <i class="bi bi-check-circle fs-1 d-block mb-2 text-success"></i>
+                                        No remaining fees found. All students are up to date!
+                                    </td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pending Scholarship Applications (Dynamic) -->
+    @php
+        $pendingApps = \App\Models\Fee\ScholarshipApplication::with(['student', 'scholarship'])
+            ->where('status', 'pending')
+            ->limit(5)
+            ->get();
+    @endphp
+    
+    @if($pendingApps->count() > 0)
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-warning">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 text-warning"><i class="bi bi-file-earmark-check me-2"></i>Pending Scholarship Applications</h5>
+                    <a href="{{ route('fees.scholarship-applications.index') }}" class="btn btn-sm btn-warning">View All</a>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
@@ -186,36 +282,35 @@
                                 </tr>
                             </thead>
                             <tbody>
+                                @foreach($pendingApps as $app)
                                 <tr>
-                                    <td>Student A</td>
-                                    <td>Merit Scholarship</td>
-                                    <td>₹10,000</td>
-                                    <td>2 days ago</td>
+                                    <td>
+                                        <strong>{{ $app->student->first_name ?? 'N/A' }} {{ $app->student->last_name ?? '' }}</strong><br>
+                                        <small>{{ $app->student->admission_number ?? 'N/A' }}</small>
+                                    </td>
+                                    <td>{{ $app->scholarship->name ?? 'N/A' }}</td>
+                                    <td>
+                                        @if($app->scholarship)
+                                            {{ $app->scholarship->type === 'percentage' ? $app->scholarship->value . '%' : '₹' . number_format($app->scholarship->value, 2) }}
+                                        @else
+                                            N/A
+                                        @endif
+                                    </td>
+                                    <td>{{ $app->created_at->format('d M Y') }}</td>
                                     <td><span class="badge bg-warning">Pending</span></td>
                                     <td>
-                                        <a href="#" class="btn btn-sm btn-success">
-                                            <i class="bi bi-check"></i>
-                                        </a>
-                                        <a href="#" class="btn btn-sm btn-danger">
+                                        <form action="{{ route('fees.scholarship-applications.approve', $app) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm btn-success" title="Approve" onclick="return confirm('Approve this application?')">
+                                                <i class="bi bi-check"></i>
+                                            </button>
+                                        </form>
+                                        <a href="{{ route('fees.scholarship-applications.index') }}" class="btn btn-sm btn-danger" title="Reject">
                                             <i class="bi bi-x"></i>
                                         </a>
                                     </td>
                                 </tr>
-                                <tr>
-                                    <td>Student B</td>
-                                    <td>SC/ST Scholarship</td>
-                                    <td>₹15,000</td>
-                                    <td>3 days ago</td>
-                                    <td><span class="badge bg-warning">Pending</span></td>
-                                    <td>
-                                        <a href="#" class="btn btn-sm btn-success">
-                                            <i class="bi bi-check"></i>
-                                        </a>
-                                        <a href="#" class="btn btn-sm btn-danger">
-                                            <i class="bi bi-x"></i>
-                                        </a>
-                                    </td>
-                                </tr>
+                                @endforeach
                             </tbody>
                         </table>
                     </div>
@@ -223,5 +318,6 @@
             </div>
         </div>
     </div>
+    @endif
 </div>
 @endsection

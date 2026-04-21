@@ -4,7 +4,7 @@
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title" id="addClassModalLabel">
-                    <i class="bi bi-plus-circle me-2"></i>Add Class to Timetable
+                    <i class="fa fa-plus-circle me-2"></i>Add Class to Timetable
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -15,7 +15,7 @@
 
                     <!-- Class Details Section -->
                     <h6 class="border-bottom pb-2 mb-3">
-                        <i class="bi bi-info-circle me-2"></i>Class Details
+                        <i class="fa fa-info-circle me-2"></i>Class Details
                     </h6>
 
                     <div class="row g-3">
@@ -90,7 +90,7 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                             <div id="holidayWarning" class="alert alert-warning mt-2 d-none">
-                                <i class="bi bi-exclamation-triangle me-2"></i>
+                                <i class="fa fa-exclamation-triangle me-2"></i>
                                 <span id="holidayWarningText"></span>
                             </div>
                         </div>
@@ -180,17 +180,17 @@
 
                     <!-- Conflict Warning -->
                     <div id="conflictWarning" class="alert alert-danger mt-3 d-none">
-                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        <i class="fa fa-exclamation-triangle-fill me-2"></i>
                         <strong>Schedule Conflict Detected!</strong>
                         <ul id="conflictList" class="mb-0 mt-2"></ul>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="bi bi-x-circle me-1"></i> Cancel
+                        <i class="fa fa-circle-xmark me-1"></i> Cancel
                     </button>
                     <button type="submit" class="btn btn-primary" id="addSubmitBtn">
-                        <i class="bi bi-check-circle me-1"></i> Add Class
+                        <i class="fa fa-circle-check me-1"></i> Add Class
                     </button>
                 </div>
             </form>

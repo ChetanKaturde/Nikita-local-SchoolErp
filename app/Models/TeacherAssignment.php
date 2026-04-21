@@ -24,6 +24,7 @@ class TeacherAssignment extends Model
         'subject_id',
         'assignment_type',
         'is_primary',
+        'is_active',
     ];
 
     protected $casts = [

@@ -6,7 +6,7 @@
 <div class="container-fluid">
     <div class="row mb-4">
         <div class="col-12">
-            <h2><i class="bi bi-copy me-2"></i>Copy Timetable to Next Session</h2>
+            <h2><i class="fa fa-copy me-2"></i>Copy Timetable to Next Session</h2>
             <p class="text-muted">Duplicate the current timetable to a new academic year</p>
         </div>
     </div>
@@ -62,7 +62,7 @@
                         </div>
 
                         <div class="alert alert-warning">
-                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            <i class="fa fa-exclamation-triangle me-2"></i>
                             <strong>Note:</strong> 
                             <ul class="mb-0">
                                 <li>Existing timetable entries in the target year will not be overwritten</li>
@@ -73,7 +73,7 @@
 
                         <div class="mb-3">
                             <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-copy"></i> Copy Timetable
+                                <i class="fa fa-copy"></i> Copy Timetable
                             </button>
                             <a href="{{ route('academic.timetable.index') }}" class="btn btn-secondary">
                                 Cancel
@@ -87,7 +87,7 @@
         <div class="col-md-4">
             <div class="card shadow-sm">
                 <div class="card-header bg-info text-white">
-                    <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>How it Works</h5>
+                    <h5 class="mb-0"><i class="fa fa-info-circle me-2"></i>How it Works</h5>
                 </div>
                 <div class="card-body">
                     <ol>

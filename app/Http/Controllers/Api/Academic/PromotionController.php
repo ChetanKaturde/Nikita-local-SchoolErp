@@ -89,7 +89,7 @@ class PromotionController extends Controller
     {
         $validated = $request->validate([
             'to_session_id' => 'required|exists:academic_sessions,id',
-            'to_program_id' => 'required|exists:programs,id',
+            'to_program_id' => 'required|exists:standards,id',
             'to_academic_year' => 'required|string|max:20',
             'to_division_id' => 'required|exists:divisions,id',
         ]);
@@ -132,7 +132,7 @@ class PromotionController extends Controller
     {
         $validated = $request->validate([
             'to_session_id' => 'required|exists:academic_sessions,id',
-            'to_program_id' => 'required|exists:programs,id',
+            'to_program_id' => 'required|exists:standards,id',
             'to_academic_year' => 'required|string|max:20',
             'to_division_id' => 'required|exists:divisions,id',
             'is_override' => 'boolean',
@@ -185,7 +185,7 @@ class PromotionController extends Controller
     {
         $validated = $request->validate([
             'from_session_id' => 'required|exists:academic_sessions,id',
-            'program_id' => 'nullable|exists:programs,id',
+            'program_id' => 'nullable|exists:standards,id',
         ]);
 
         $students = $this->promotionService->getEligibleStudents(
@@ -227,7 +227,7 @@ class PromotionController extends Controller
             'student_ids' => 'required|array|min:1',
             'student_ids.*' => 'exists:students,id',
             'to_session_id' => 'required|exists:academic_sessions,id',
-            'to_program_id' => 'required|exists:programs,id',
+            'to_program_id' => 'required|exists:standards,id',
             'to_academic_year' => 'required|string|max:20',
             'to_division_id' => 'required|exists:divisions,id',
         ]);

@@ -187,7 +187,7 @@
                     </table>
                 </div>
                 
-                @if($students instanceof \Illuminate\Pagination\LengthAwarePaginator)
+                @if($students instanceof \Illuminate\Pagination\LengthAwarePaginator && $students->total() > 0)
                     <div class="mt-4">
                         <nav aria-label="Page navigation">
                             <ul class="pagination justify-content-center">
@@ -202,26 +202,18 @@
                                     </li>
                                 @endif
 
-                                {{-- Pagination Elements --}}
-                                @foreach ($elements as $element)
-                                    {{-- "Three Dots" Separator --}}
-                                    @if (is_string($element))
-                                        <li class="page-item disabled"><span class="page-link">{{ $element }}</span></li>
+                                {{-- Simple page number links --}}
+                                @for ($i = 1; $i <= $students->lastPage(); $i++)
+                                    @if ($i == 1 || $i == $students->lastPage() || abs($i - $students->currentPage()) <= 1)
+                                        @if ($i == $students->currentPage())
+                                            <li class="page-item active"><span class="page-link">{{ $i }}</span></li>
+                                        @else
+                                            <li class="page-item"><a class="page-link" href="{{ $students->url($i) }}">{{ $i }}</a></li>
+                                        @endif
+                                    @elseif ($i == $students->currentPage() - 2 || $i == $students->currentPage() + 2)
+                                        <li class="page-item disabled"><span class="page-link">...</span></li>
                                     @endif
-
-                                    {{-- Array Of Links --}}
-                                    @if (is_array($element))
-                                        @foreach ($element as $page => $url)
-                                            @if ($page == $students->currentPage())
-                                                <li class="page-item active"><span class="page-link">{{ $page }}</span></li>
-                                            @elseif ($page == 1 || $page == $students->lastPage() || abs($page - $students->currentPage()) <= 2)
-                                                <li class="page-item"><a class="page-link" href="{{ $url }}">{{ $page }}</a></li>
-                                            @elseif ($page == $students->currentPage() - 3 || $page == $students->currentPage() + 3)
-                                                <li class="page-item disabled"><span class="page-link">...</span></li>
-                                            @endif
-                                        @endforeach
-                                    @endif
-                                @endforeach
+                                @endfor
 
                                 {{-- Next Page Link --}}
                                 @if ($students->hasMorePages())

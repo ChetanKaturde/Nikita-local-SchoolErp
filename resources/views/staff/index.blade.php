@@ -23,7 +23,7 @@
                             <th>Designation</th>
                             <th>Department</th>
                             <th>Status</th>
-                            <th>Actions</th>
+                            <th class="text-center">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -39,13 +39,15 @@
                                     {{ ucfirst($member->status) }}
                                 </span>
                             </td>
-                            <td>
-                                <a href="{{ route('staff.show', $member) }}" class="btn btn-sm btn-info">
-                                    <i class="bi bi-eye"></i>
-                                </a>
-                                <a href="{{ route('staff.edit', $member) }}" class="btn btn-sm btn-warning">
-                                    <i class="bi bi-pencil"></i>
-                                </a>
+                            <td class="text-center">
+                                <div class="d-flex gap-1 justify-content-center">
+                                    <a href="{{ route('staff.show', $member) }}" class="btn btn-sm btn-info">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{{ route('staff.edit', $member) }}" class="btn btn-sm btn-warning">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                         @empty

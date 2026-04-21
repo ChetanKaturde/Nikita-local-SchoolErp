@@ -26,6 +26,8 @@ class User extends Authenticatable
         'email',
         'password',
         'is_active',
+        'temp_password',
+        'password_generated_at',
     ];
 
     /**
@@ -35,6 +37,7 @@ class User extends Authenticatable
      */
     protected $hidden = [
         'password',
+        'temp_password',
         'remember_token',
     ];
 
@@ -49,6 +52,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_active' => 'boolean',
+            'password_generated_at' => 'datetime',
         ];
     }
 
@@ -96,10 +100,45 @@ class User extends Authenticatable
 
     /**
      * A teacher can be assigned to one division as class teacher
+     * This checks both the divisions.class_teacher_id field and teacher_assignments table
+     * Note: This returns the actual division, not a relationship
      */
-    public function assignedDivision(): HasOne
+    public function getAssignedDivisionAttribute()
     {
-        return $this->hasOne(\App\Models\Academic\Division::class, 'class_teacher_id');
+        // First try to get from teacher_assignments table (active assignment)
+        $assignment = \App\Models\TeacherAssignment::where('teacher_id', $this->id)
+            ->where('assignment_type', 'division')
+            ->where('is_active', true)
+            ->first();
+
+        if ($assignment && $assignment->division) {
+            return $assignment->division;
+        }
+
+        // Fallback to class_teacher_id field
+        return \App\Models\Academic\Division::where('class_teacher_id', $this->id)->first();
+    }
+
+    /**
+     * Get all assigned divisions for a teacher (as a list attribute)
+     */
+    public function getAssignedDivisionsListAttribute()
+    {
+        return \App\Models\TeacherAssignment::where('teacher_id', $this->id)
+            ->where('is_active', true)
+            ->with('division')
+            ->get()
+            ->filter(function($assignment) {
+                return $assignment->division !== null;
+            });
+    }
+
+    /**
+     * Relationship: Divisions where this user is class teacher
+     */
+    public function classTeacherDivisions()
+    {
+        return $this->hasMany(\App\Models\Academic\Division::class, 'class_teacher_id');
     }
 
     /**

@@ -62,7 +62,7 @@ class AcademicYear extends Model
      */
     public function getNameAttribute(): string
     {
-        return $this->year_name ?? 'Year ' . $this->year_number;
+        return $this->year_name ?? 'Year '.$this->year_number;
     }
 
     /**
@@ -71,6 +71,7 @@ class AcademicYear extends Model
     public static function getCurrentAcademicYearId(): ?int
     {
         $year = self::getCurrentAcademicYear();
+
         return $year?->id;
     }
 

@@ -18,32 +18,29 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('attendance', function (Blueprint $table) {
-            // Rename attendance_date to date if it exists
-            if (DB::getSchemaBuilder()->hasColumn('attendance', 'attendance_date')) {
-                $table->renameColumn('attendance_date', 'date');
-            }
+            // DB column is attendance_date — do NOT rename it
 
             // Add ip_address if not exists
-            if (!DB::getSchemaBuilder()->hasColumn('attendance', 'ip_address')) {
+            if (!Schema::hasColumn('attendance', 'ip_address')) {
                 $table->string('ip_address', 45)->nullable()->after('remarks');
             }
 
             // Add indexes if they don't exist
             $indexes = DB::select("SHOW INDEX FROM attendance");
             $indexNames = array_column($indexes, 'Key_name');
-            
-            if (!in_array('attendance_date_student_id_index', $indexNames) && !in_array('date_student_id_index', $indexNames)) {
-                $table->index(['date', 'student_id']);
+
+            if (!in_array('attendance_date_student_id_index', $indexNames)) {
+                $table->index(['attendance_date', 'student_id'], 'attendance_date_student_id_index');
             }
-            
-            if (DB::getSchemaBuilder()->hasColumn('attendance', 'timetable_id')) {
-                if (!in_array('attendance_timetable_id_date_index', $indexNames) && !in_array('timetable_id_date_index', $indexNames)) {
-                    $table->index(['timetable_id', 'date']);
+
+            if (Schema::hasColumn('attendance', 'timetable_id')) {
+                if (!in_array('attendance_timetable_id_date_index', $indexNames)) {
+                    $table->index(['timetable_id', 'attendance_date'], 'attendance_timetable_id_date_index');
                 }
             }
-            
-            if (!in_array('attendance_marked_by_date_index', $indexNames) && !in_array('marked_by_date_index', $indexNames)) {
-                $table->index(['marked_by', 'date']);
+
+            if (!in_array('attendance_marked_by_date_index', $indexNames)) {
+                $table->index(['marked_by', 'attendance_date'], 'attendance_marked_by_date_index');
             }
         });
     }
@@ -54,18 +51,22 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('attendance', function (Blueprint $table) {
-            // Check if column is named 'date' and rename back
-            if (DB::getSchemaBuilder()->hasColumn('attendance', 'date') && !DB::getSchemaBuilder()->hasColumn('attendance', 'attendance_date')) {
-                $table->renameColumn('date', 'attendance_date');
-            }
-            
-            if (DB::getSchemaBuilder()->hasColumn('attendance', 'ip_address')) {
+            if (Schema::hasColumn('attendance', 'ip_address')) {
                 $table->dropColumn('ip_address');
             }
-            
-            $table->dropIndex(['date', 'student_id']);
-            $table->dropIndex(['timetable_id', 'date']);
-            $table->dropIndex(['marked_by', 'date']);
+
+            $indexes = \Illuminate\Support\Facades\DB::select("SHOW INDEX FROM attendance");
+            $indexNames = array_column($indexes, 'Key_name');
+
+            if (in_array('attendance_date_student_id_index', $indexNames)) {
+                $table->dropIndex('attendance_date_student_id_index');
+            }
+            if (in_array('attendance_timetable_id_date_index', $indexNames)) {
+                $table->dropIndex('attendance_timetable_id_date_index');
+            }
+            if (in_array('attendance_marked_by_date_index', $indexNames)) {
+                $table->dropIndex('attendance_marked_by_date_index');
+            }
         });
     }
 };

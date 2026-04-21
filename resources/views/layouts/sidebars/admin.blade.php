@@ -1,6 +1,7 @@
 @php
     $adminMenuItems = [
         ['name' => 'Dashboard', 'route' => 'dashboard.admin', 'icon' => 'speedometer2'],
+        ['name' => 'User Credentials', 'route' => 'admin.credentials', 'icon' => 'key'],
         ['name' => 'Users', 'route' => 'admin.users', 'icon' => 'people'],
         ['name' => 'Admissions', 'route' => 'admissions.index', 'icon' => 'person-plus-fill'],
         
@@ -9,7 +10,7 @@
         ['name' => 'Programs', 'route' => 'academic.programs.index', 'icon' => 'mortarboard'],
         ['name' => 'Subjects', 'route' => 'academic.subjects.index', 'icon' => 'book'],
         ['name' => 'Divisions', 'route' => 'academic.divisions.index', 'icon' => 'diagram-3'],
-        ['name' => 'Academic Sessions', 'route' => 'web.academic.sessions.index', 'icon' => 'calendar-event'],
+        ['name' => 'Academic Sessions', 'route' => 'academic.sessions.index', 'icon' => 'calendar-event'],
         
         // Students & Teachers
         ['name' => 'Students', 'route' => 'dashboard.students.index', 'icon' => 'people-fill'],

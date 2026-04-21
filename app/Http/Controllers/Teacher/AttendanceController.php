@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Academic\Attendance;
 use App\Models\Academic\Timetable;
 use App\Models\Academic\Division;
-use App\Models\Academic\AcademicYear;
 use App\Models\User;
 use App\Services\HolidayService;
 use Illuminate\Http\Request;
@@ -15,6 +14,9 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\AttendanceExport;
 
 /**
  * Teacher Attendance Controller
@@ -77,11 +79,11 @@ class AttendanceController extends Controller
         // Check if attendance is already marked for each lecture
         foreach ($todaySchedule as $lecture) {
             $lecture->attendance_marked = Attendance::where('timetable_id', $lecture->id)
-                ->where('attendance_date', $today)
+                ->whereDate('date', $today)
                 ->exists();
-            
+
             $lecture->attendance_count = Attendance::where('timetable_id', $lecture->id)
-                ->where('attendance_date', $today)
+                ->whereDate('date', $today)
                 ->count();
         }
         
@@ -102,46 +104,45 @@ class AttendanceController extends Controller
     /**
      * Show form to mark attendance for a specific lecture
      */
-    public function create(int $timetableId): View
+    public function create(int $timetableId): View|RedirectResponse
     {
         $teacher = Auth::user();
         $timetable = Timetable::with(['division.students', 'subject'])
             ->findOrFail($timetableId);
-        
+
         // Verify teacher is assigned to this timetable
         if ($timetable->teacher_id != $teacher->id) {
             abort(403, 'You are not authorized to mark attendance for this lecture.');
         }
-        
+
         // Get date from request or default to today
-        $date = request()->get('date', now()->format('Y-m-d'));
-        
-        // Check if the date is a holiday
-        $academicYearId = AcademicYear::getCurrentAcademicYearId();
-        $holidayCheck = $this->holidayService->validateAttendanceDate($date, $academicYearId);
-        
-        if ($holidayCheck['is_holiday']) {
-            return redirect()->route('teacher.attendance.index')
-                ->with('error', 'Selected date is a holiday. Timetable and Attendance cannot be added.');
-        }
-        
-        // Get all students in the division
+        $date = request()->query->get('date', now()->format('Y-m-d'));
+
+        // Get all students in the division with pagination
         $students = $timetable->division->students()
             ->where('student_status', 'active')
             ->orderBy('roll_number')
-            ->get();
-        
+            ->paginate(10);
+
         // Get existing attendance for this lecture and date
         $existingAttendance = Attendance::where('timetable_id', $timetableId)
-            ->where('attendance_date', $date)
+            ->where('date', $date)
             ->get()
             ->keyBy('student_id');
-        
+
+        // Get all dates with attendance for this timetable
+        $attendanceDates = Attendance::where('timetable_id', $timetableId)
+            ->select('date')
+            ->distinct()
+            ->orderBy('date', 'desc')
+            ->pluck('date');
+
         return view('teacher.attendance.mark', compact(
             'timetable',
             'students',
             'existingAttendance',
-            'date'
+            'date',
+            'attendanceDates'
         ));
     }
 
@@ -156,57 +157,37 @@ class AttendanceController extends Controller
         $validated = $request->validate([
             'date' => 'required|date',
             'attendances' => 'required|array',
-            'attendances.*.student_id' => 'required|exists:users,id',
+            'attendances.*.student_id' => 'required|exists:students,id',
             'attendances.*.status' => 'required|in:present,absent,late',
             'attendances.*.remarks' => 'nullable|string|max:255',
         ]);
-        
+
         $timetable = Timetable::findOrFail($timetableId);
-        
-        // Get the computed status (automatic based on date)
-        $computedStatus = $timetable->computed_status ?? $timetable->status;
-        $timetableDate = $timetable->date ? $timetable->date->format('Y-m-d') : null;
-        $today = now()->format('Y-m-d');
-        $todayDay = strtolower(now()->format('l'));
-        
-        // Check if attendance can be marked
-        if (!$timetable->isActiveForAttendance()) {
-            // Provide specific error messages based on the reason
-            if ($timetableDate && $timetableDate < $today) {
-                return back()->with('error', 'Cannot mark attendance. The timetable date has passed (' . $timetableDate . ') and is now closed.');
-            } elseif ($timetableDate && $timetableDate > $today) {
-                return back()->with('error', 'Cannot mark attendance. The timetable is scheduled for a future date (' . $timetableDate . ').');
-            } elseif (!empty($timetable->day_of_week) && strtolower($timetable->day_of_week) !== $todayDay) {
-                return back()->with('error', 'Cannot mark attendance. Today is ' . ucfirst($todayDay) . ' but the timetable is scheduled for ' . ucfirst($timetable->day_of_week) . '.');
-            } elseif ($computedStatus === 'closed') {
-                return back()->with('error', 'Cannot mark attendance. The timetable is closed.');
-            } else {
-                return back()->with('error', 'Cannot mark attendance. The timetable is not active for today.');
-            }
-        }
-        
+
         // Verify teacher is assigned to this timetable
         if ($timetable->teacher_id != $teacher->id) {
-            abort(403, 'Unauthorized');
+            return back()->with('error', 'You are not authorized to mark attendance for this class. Please contact admin if you think this is an error.');
         }
-        
-        // Check if the date is a holiday
-        $academicYearId = AcademicYear::getCurrentAcademicYearId();
-        $holidayCheck = $this->holidayService->validateAttendanceDate($validated['date'], $academicYearId);
-        
-        if ($holidayCheck['is_holiday']) {
-            return back()->with('error', 'Selected date is a holiday. Timetable and Attendance cannot be added.');
-        }
-        
+
+        // Check if this is an update (attendance already exists for this date)
+        $existingAttendance = Attendance::where('timetable_id', $timetableId)
+            ->whereDate('date', $validated['date'])
+            ->first();
+
+        $isUpdate = $existingAttendance !== null;
+
         try {
             DB::beginTransaction();
-            
+
+            $updated = 0;
+            $created = 0;
+
             foreach ($validated['attendances'] as $attendanceData) {
-                Attendance::updateOrCreate(
+                $attendance = Attendance::updateOrCreate(
                     [
                         'student_id' => $attendanceData['student_id'],
                         'timetable_id' => $timetableId,
-                        'attendance_date' => $validated['date'],
+                        'date' => $validated['date'],
                     ],
                     [
                         'marked_by' => $teacher->id,
@@ -215,15 +196,36 @@ class AttendanceController extends Controller
                         'ip_address' => $request->ip(),
                     ]
                 );
-            }
-            
-            DB::commit();
-            
-            return redirect()->route('teacher.attendance.index')
-                ->with('success', 'Attendance marked successfully for ' . $timetable->division->division_name);
                 
+                // Track if this was an update (existing record) or new
+                if ($attendance->wasRecentlyCreated) {
+                    $created++;
+                } else {
+                    $updated++;
+                }
+            }
+
+            DB::commit();
+
+            // Build appropriate message
+            if ($isUpdate) {
+                $message = "✓ Updated attendance for {$updated} students in " . $timetable->division->division_name;
+                if ($created > 0) {
+                    $message .= " ({$created} new)";
+                }
+                \Log::info('Attendance updated: ' . $message);
+            } else {
+                $message = "✓ Attendance marked successfully for {$created} students in " . $timetable->division->division_name;
+                \Log::info('Attendance created: ' . $message);
+            }
+
+            // Redirect with success message
+            return redirect()->route('teacher.attendance.index')
+                ->with('success', $message);
+
         } catch (\Exception $e) {
             DB::rollBack();
+            \Log::error('Attendance save error: ' . $e->getMessage());
             return back()->with('error', 'Failed to mark attendance: ' . $e->getMessage());
         }
     }
@@ -234,23 +236,24 @@ class AttendanceController extends Controller
     public function history(Request $request): View
     {
         $teacher = Auth::user();
-        
+
         // Get teacher's divisions
         $divisions = Division::whereHas('timetables', function($q) use ($teacher) {
             $q->where('teacher_id', $teacher->id);
         })->get();
-        
+
         $divisionId = $request->get('division_id');
         $startDate = $request->get('start_date', now()->startOfMonth()->format('Y-m-d'));
         $endDate = $request->get('end_date', now()->endOfMonth()->format('Y-m-d'));
-        
+        $perPage = $request->get('per_page', 20);
+
         $attendances = collect();
         $selectedDivision = null;
-        
+
         if ($divisionId) {
             $selectedDivision = Division::findOrFail($divisionId);
-            
-            // Get attendance records for this division
+
+            // Get attendance records for this division with pagination
             $attendances = Attendance::whereHas('timetable', function($q) use ($divisionId, $teacher) {
                     $q->where('division_id', $divisionId)
                       ->where('teacher_id', $teacher->id);
@@ -258,10 +261,9 @@ class AttendanceController extends Controller
                 ->whereBetween('date', [$startDate, $endDate])
                 ->with(['student', 'timetable.subject'])
                 ->latest('date')
-                ->latest()
-                ->paginate(20);
+                ->paginate($perPage);
         }
-        
+
         return view('teacher.attendance.history', compact(
             'divisions',
             'attendances',
@@ -269,6 +271,88 @@ class AttendanceController extends Controller
             'startDate',
             'endDate'
         ));
+    }
+
+    /**
+     * Download attendance report as Excel
+     */
+    public function downloadExcel(Request $request)
+    {
+        $teacher = Auth::user();
+        $divisionId = $request->get('division_id');
+        $startDate = $request->get('start_date', now()->startOfMonth()->format('Y-m-d'));
+        $endDate = $request->get('end_date', now()->endOfMonth()->format('Y-m-d'));
+
+        if (!$divisionId) {
+            return back()->with('error', 'Please select a division');
+        }
+
+        $selectedDivision = Division::findOrFail($divisionId);
+
+        // Get attendance records
+        $attendances = Attendance::whereHas('timetable', function($q) use ($divisionId, $teacher) {
+                $q->where('division_id', $divisionId)
+                  ->where('teacher_id', $teacher->id);
+            })
+            ->whereBetween('date', [$startDate, $endDate])
+            ->with(['student', 'timetable.subject'])
+            ->latest('date')
+            ->get();
+
+        // Create Excel file
+        $fileName = 'Attendance_Report_' . $selectedDivision->division_name . '_' . date('Y-m-d') . '.xlsx';
+        
+        return Excel::download(new AttendanceExport($attendances, $selectedDivision, $startDate, $endDate), $fileName);
+    }
+
+    /**
+     * Download attendance report as PDF
+     */
+    public function downloadPDF(Request $request)
+    {
+        $teacher = Auth::user();
+        $divisionId = $request->get('division_id');
+        $startDate = $request->get('start_date', now()->startOfMonth()->format('Y-m-d'));
+        $endDate = $request->get('end_date', now()->endOfMonth()->format('Y-m-d'));
+
+        if (!$divisionId) {
+            return back()->with('error', 'Please select a division');
+        }
+
+        $selectedDivision = Division::findOrFail($divisionId);
+
+        // Get attendance records
+        $attendances = Attendance::whereHas('timetable', function($q) use ($divisionId, $teacher) {
+                $q->where('division_id', $divisionId)
+                  ->where('teacher_id', $teacher->id);
+            })
+            ->whereBetween('date', [$startDate, $endDate])
+            ->with(['student', 'timetable.subject'])
+            ->latest('date')
+            ->get();
+
+        // Calculate statistics
+        $totalRecords = $attendances->count();
+        $presentCount = $attendances->where('status', 'present')->count();
+        $absentCount = $attendances->where('status', 'absent')->count();
+        $lateCount = $attendances->where('status', 'late')->count();
+        $attendancePercentage = $totalRecords > 0 ? round(($presentCount + $lateCount) / $totalRecords * 100, 2) : 0;
+
+        $pdf = PDF::loadView('teacher.attendance.pdf-report', compact(
+            'attendances',
+            'selectedDivision',
+            'startDate',
+            'endDate',
+            'totalRecords',
+            'presentCount',
+            'absentCount',
+            'lateCount',
+            'attendancePercentage'
+        ));
+
+        $fileName = 'Attendance_Report_' . $selectedDivision->division_name . '_' . date('Y-m-d') . '.pdf';
+        
+        return $pdf->download($fileName);
     }
 
     /**

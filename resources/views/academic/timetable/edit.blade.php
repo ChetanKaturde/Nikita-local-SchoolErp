@@ -116,10 +116,10 @@
             <div class="card shadow-sm form-card">
                 <div class="form-card-header d-flex justify-content-between align-items-center">
                     <h5>
-                        <i class="bi bi-pencil-square me-2"></i>Edit Timetable Entry
+                        <i class="fa fa-pencil-square me-2"></i>Edit Timetable Entry
                     </h5>
                     <a href="{{ route('academic.timetable.index') }}" class="btn btn-light btn-sm">
-                        <i class="bi bi-arrow-left"></i> Back
+                        <i class="fa fa-arrow-left"></i> Back
                     </a>
                 </div>
                 <div class="card-body p-4">
@@ -132,7 +132,7 @@
                         <!-- Division Selection -->
                         <div class="form-section">
                             <div class="form-section-title">
-                                <i class="bi bi-people"></i>
+                                <i class="fa fa-users"></i>
                                 Division Selection
                             </div>
                             <div class="row">
@@ -157,7 +157,7 @@
                         <!-- Class Details -->
                         <div class="form-section">
                             <div class="form-section-title">
-                                <i class="bi bi-book"></i>
+                                <i class="fa fa-book"></i>
                                 Class Details
                             </div>
                             <div class="row">
@@ -197,7 +197,7 @@
                         <!-- Schedule Details -->
                         <div class="form-section">
                             <div class="form-section-title">
-                                <i class="bi bi-clock"></i>
+                                <i class="fa fa-clock"></i>
                                 Schedule Details
                             </div>
                             <div class="row">
@@ -216,7 +216,7 @@
                                             <option value="saturday" {{ $timetable->day_of_week == 'saturday' ? 'selected' : '' }}>Saturday</option>
                                         </select>
                                         <div class="form-text">
-                                            <i class="bi bi-info-circle"></i> For recurring weekly schedule
+                                            <i class="fa fa-info-circle"></i> For recurring weekly schedule
                                         </div>
                                     </div>
                                 </div>
@@ -226,7 +226,7 @@
                                         <input type="date" name="date" id="date" class="form-control"
                                                value="{{ $timetable->date ? $timetable->date->format('Y-m-d') : old('date') }}">
                                         <div class="form-text">
-                                            <i class="bi bi-info-circle"></i> For one-time schedule on specific date
+                                            <i class="fa fa-info-circle"></i> For one-time schedule on specific date
                                         </div>
                                     </div>
                                 </div>
@@ -255,7 +255,7 @@
                         <!-- Room Allocation -->
                         <div class="form-section">
                             <div class="form-section-title">
-                                <i class="bi bi-geo-alt"></i>
+                                <i class="fa fa-location-dot"></i>
                                 Room Allocation
                             </div>
                             <div class="row">
@@ -284,17 +284,17 @@
 
                         <!-- Slot Availability Status -->
                         <div id="slotStatus" class="alert d-none">
-                            <i class="bi bi-info-circle me-2"></i>
+                            <i class="fa fa-info-circle me-2"></i>
                             <span id="slotStatusMessage">Checking availability...</span>
                         </div>
 
                         <!-- Form Actions -->
                         <div class="d-flex gap-2 mt-4">
                             <button type="submit" class="btn btn-warning" id="submitBtn">
-                                <i class="bi bi-check-lg me-1"></i>Update Entry
+                                <i class="fa fa-check me-1"></i>Update Entry
                             </button>
                             <a href="{{ route('academic.timetable.index') }}" class="btn btn-secondary">
-                                <i class="bi bi-x-lg me-1"></i>Cancel
+                                <i class="fa fa-xmark me-1"></i>Cancel
                             </a>
                         </div>
                     </form>
@@ -340,12 +340,12 @@ function checkSlotAvailability() {
 
         if (data.available) {
             slotStatus.classList.add('slot-available');
-            slotStatusMessage.innerHTML = '<i class="bi bi-check-circle me-2"></i>' + data.message;
+            slotStatusMessage.innerHTML = '<i class="fa fa-circle-check me-2"></i>' + data.message;
             timeConflict.textContent = '';
             submitBtn.disabled = false;
         } else {
             slotStatus.classList.add('slot-conflict');
-            slotStatusMessage.innerHTML = '<i class="bi bi-exclamation-triangle me-2"></i>' + data.message;
+            slotStatusMessage.innerHTML = '<i class="fa fa-exclamation-triangle me-2"></i>' + data.message;
             timeConflict.textContent = data.message;
             submitBtn.disabled = true;
         }

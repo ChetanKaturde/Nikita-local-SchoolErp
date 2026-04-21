@@ -36,7 +36,7 @@
                     <div class="input-group">
                         <input type="text" name="search" class="form-control" placeholder="Search by name or code..." value="{{ request('search') }}">
                         <button class="btn btn-outline-secondary" type="submit">
-                            <i class="bi bi-search"></i>
+                            <i class="fas fa-search"></i>
                         </button>
                         @if(request()->hasAny(['search', 'program_id']))
                             <a href="{{ route('academic.subjects.index') }}" class="btn btn-outline-danger">

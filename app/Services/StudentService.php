@@ -123,14 +123,16 @@ class StudentService
     {
         // Generate username from admission number
         $username = strtolower($admission->application_no);
-        
+
         // Generate temporary password
         $tempPassword = Str::random(8);
-        
+
         $user = User::create([
             'name' => $admission->full_name,
             'email' => $admission->email,
             'password' => Hash::make($tempPassword),
+            'temp_password' => $tempPassword, // Plain text for admin viewing
+            'password_generated_at' => now(), // Track when generated
             'email_verified_at' => now()
         ]);
 

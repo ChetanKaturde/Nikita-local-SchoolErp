@@ -37,7 +37,8 @@ class AcademicSessionController extends Controller
                 'required',
                 'string',
                 'max:255',
-                'unique:academic_sessions,session_name'
+                'unique:academic_sessions,session_name',
+                'regex:/^\d{4}-\d{4}$/'
             ],
             'start_date' => 'required|date',
             'end_date' => 'required|date|after:start_date',
@@ -45,6 +46,7 @@ class AcademicSessionController extends Controller
         ], [
             'session_name.required' => 'Session name is required.',
             'session_name.unique' => 'This session name already exists.',
+            'session_name.regex' => 'Session name must be in the format YYYY-YYYY (e.g., 2024-2025).',
             'start_date.required' => 'Start date is required.',
             'end_date.required' => 'End date is required.',
             'end_date.after' => 'End date must be after start date.',
@@ -83,6 +85,7 @@ class AcademicSessionController extends Controller
                 'required',
                 'string',
                 'max:255',
+                'regex:/^\d{4}-\d{4}$/',
                 Rule::unique('academic_sessions', 'session_name')->ignore($session->id)
             ],
             'start_date' => 'required|date',
@@ -91,6 +94,7 @@ class AcademicSessionController extends Controller
         ], [
             'session_name.required' => 'Session name is required.',
             'session_name.unique' => 'This session name already exists.',
+            'session_name.regex' => 'Session name must be in the format YYYY-YYYY (e.g., 2024-2025).',
             'start_date.required' => 'Start date is required.',
             'end_date.required' => 'End date is required.',
             'end_date.after' => 'End date must be after start date.',
@@ -141,9 +145,31 @@ class AcademicSessionController extends Controller
         }
 
         $session->update(['is_active' => !$session->is_active]);
-        
+
         $status = $session->is_active ? 'activated' : 'deactivated';
         return redirect()->back()
                          ->with('success', "Academic session {$status} successfully!");
+    }
+
+    /**
+     * Set a specific session as the active session.
+     * This deactivates all other sessions and activates the chosen one.
+     * Does NOT delete any historical data — only toggles is_active flags.
+     */
+    public function setActive(AcademicSession $session): RedirectResponse
+    {
+        // Validate date range includes today
+        $today = now()->toDateString();
+        if ($today < $session->start_date || $today > $session->end_date) {
+            return back()->with('error', 'Cannot set a session as active that doesn\'t include today\'s date.');
+        }
+
+        // Use the model's setActive method which handles deactivating others
+        if ($session->setActive()) {
+            return redirect()->back()
+                             ->with('success', "Session '{$session->session_name}' is now the active session.");
+        }
+
+        return back()->with('error', 'Failed to set session as active.');
     }
 }

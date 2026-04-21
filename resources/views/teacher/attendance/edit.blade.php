@@ -22,7 +22,7 @@
                     <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Attendance Details</h5>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('teacher.attendance.update', $attendance->id) }}" method="POST">
+                    <form action="{{ route('teacher.attendance.record.update', $attendance->id) }}" method="POST">
                         @csrf
                         @method('PUT')
 

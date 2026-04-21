@@ -145,7 +145,7 @@ class StudentController extends Controller
             'last_name' => 'required|string|max:255',
             'email' => 'nullable|email',
             'mobile_number' => 'nullable|string|max:15',
-            'program_id' => 'required|exists:programs,id',
+            'program_id' => 'required|exists:standards,id',
             'division_id' => 'required|exists:divisions,id',
             'date_of_birth' => 'required|date',
             'gender' => 'required|string|in:male,female,other',

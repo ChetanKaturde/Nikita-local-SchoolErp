@@ -64,7 +64,7 @@
                                     <div class="col-md-4 mb-3">
                                         <label for="date_of_birth" class="form-label">Date of Birth <span class="text-danger">*</span></label>
                                         <input type="date" class="form-control @error('date_of_birth') is-invalid @enderror" 
-                                               id="date_of_birth" name="date_of_birth" value="{{ old('date_of_birth', $student->date_of_birth?->format('Y-m-d')) }}" required>
+                                               id="date_of_birth" name="date_of_birth" value="{{ old('date_of_birth', $student->date_of_birth?->format('Y-m-d')) }}" max="{{ date('Y-m-d') }}" required>
                                         @error('date_of_birth')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror

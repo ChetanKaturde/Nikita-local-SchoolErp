@@ -20,12 +20,32 @@
             ['name' => 'Programs', 'route' => 'academic.programs.index', 'icon' => 'mortarboard'],
             ['name' => 'Subjects', 'route' => 'academic.subjects.index', 'icon' => 'book'],
             ['name' => 'Divisions', 'route' => 'academic.divisions.index', 'icon' => 'diagram-3'],
-            ['name' => 'Academic Sessions', 'route' => 'web.academic.sessions.index', 'icon' => 'calendar-event'],
+            ['name' => 'Academic Sessions', 'route' => 'academic.sessions.index', 'icon' => 'calendar-event'],
             
             // Timetable & Attendance Section
             ['name' => 'Timetable', 'route' => 'academic.timetable.grid', 'icon' => 'calendar-week'],
             ['name' => 'Attendance', 'route' => 'academic.attendance.index', 'icon' => 'clipboard-check'],
             ['name' => 'Holidays', 'route' => 'academic.holidays.index', 'icon' => 'calendar-event'],
+            
+            // Fee Management
+            ['name' => 'Fee Structures', 'route' => 'fees.structures.index', 'icon' => 'list-columns'],
+            ['name' => 'Fee Assignment', 'route' => 'fees.assignments.index', 'icon' => 'clipboard-plus'],
+            ['name' => 'Fee Collection', 'route' => 'fees.payments.index', 'icon' => 'cash-stack'],
+            ['name' => 'Outstanding Fees', 'route' => 'fees.outstanding.index', 'icon' => 'exclamation-triangle'],
+            
+            ['name' => 'Reports', 'route' => 'reports.index', 'icon' => 'graph-up'],
+        ],
+        'office' => [
+            ['name' => 'Dashboard', 'route' => 'dashboard.office', 'icon' => 'speedometer2'],
+            ['name' => 'Users', 'route' => 'admin.users', 'icon' => 'people'],
+            ['name' => 'Admissions', 'route' => 'admissions.index', 'icon' => 'person-plus-fill'],
+            ['name' => 'Students', 'route' => 'dashboard.students.index', 'icon' => 'people-fill'],
+            
+            // Fee Management
+            ['name' => 'Fee Structures', 'route' => 'fees.structures.index', 'icon' => 'list-columns'],
+            ['name' => 'Fee Assignment', 'route' => 'fees.assignments.index', 'icon' => 'clipboard-plus'],
+            ['name' => 'Fee Collection', 'route' => 'fees.payments.index', 'icon' => 'cash-stack'],
+            ['name' => 'Outstanding Fees', 'route' => 'fees.outstanding.index', 'icon' => 'exclamation-triangle'],
             
             ['name' => 'Reports', 'route' => 'reports.index', 'icon' => 'graph-up'],
         ],
@@ -40,7 +60,7 @@
             ['name' => 'Programs', 'route' => 'academic.programs.index', 'icon' => 'mortarboard'],
             ['name' => 'Subjects', 'route' => 'academic.subjects.index', 'icon' => 'book'],
             ['name' => 'Divisions', 'route' => 'academic.divisions.index', 'icon' => 'diagram-3'],
-            ['name' => 'Academic Sessions', 'route' => 'web.academic.sessions.index', 'icon' => 'calendar-event'],
+            ['name' => 'Academic Sessions', 'route' => 'academic.sessions.index', 'icon' => 'calendar-event'],
             
             // Timetable & Attendance Section
             ['name' => 'Timetable', 'route' => 'academic.timetable.grid', 'icon' => 'calendar-week'],
@@ -71,33 +91,24 @@
             ['name' => 'Holidays', 'route' => 'academic.holidays.index', 'icon' => 'calendar-event'],
         ],
         'accountant' => [
-            ['name' => 'Dashboard', 'route' => 'accountant.dashboard', 'icon' => 'speedometer2'],
-            ['name' => 'Fee Collection', 'route' => 'accountant.fees', 'icon' => 'cash-stack'],
-            ['name' => 'Expenses', 'route' => 'accountant.expenses', 'icon' => 'receipt'],
-            ['name' => 'Reports', 'route' => 'accountant.reports', 'icon' => 'graph-up'],
-            
-            // View Only Section
-            ['name' => 'Holidays', 'route' => 'academic.holidays.index', 'icon' => 'calendar-event'],
-        ],
-        'accountant' => [
             ['name' => 'Dashboard', 'route' => 'dashboard.accountant', 'icon' => 'speedometer2'],
+            ['name' => 'Profile', 'route' => 'accountant.profile', 'icon' => 'person-circle'],
             ['name' => 'Fee Structures', 'route' => 'fees.structures.index', 'icon' => 'list-columns'],
             ['name' => 'Fee Assignment', 'route' => 'fees.assignments.index', 'icon' => 'clipboard-plus'],
             ['name' => 'Fee Collection', 'route' => 'fees.payments.index', 'icon' => 'cash-stack'],
             ['name' => 'Outstanding Fees', 'route' => 'fees.outstanding.index', 'icon' => 'exclamation-triangle'],
+            ['name' => 'Fee Reports', 'route' => 'fees.reports', 'icon' => 'graph-up'],
             ['name' => 'Scholarships', 'route' => 'fees.scholarships.index', 'icon' => 'award'],
             ['name' => 'Scholarship Applications', 'route' => 'fees.scholarship-applications.index', 'icon' => 'file-earmark-check'],
-            ['name' => 'Fee Reports', 'route' => 'reports.attendance', 'icon' => 'graph-up'],
+
+            // View Only Section
+            ['name' => 'Holidays', 'route' => 'academic.holidays.index', 'icon' => 'calendar-event'],
         ],
         'accounts_staff' => [
             ['name' => 'Dashboard', 'route' => 'dashboard.accounts_staff', 'icon' => 'speedometer2'],
             ['name' => 'Fee Collection', 'route' => 'fees.payments.index', 'icon' => 'cash-stack'],
             ['name' => 'Outstanding Fees', 'route' => 'fees.outstanding.index', 'icon' => 'exclamation-triangle'],
-            ['name' => 'Reports', 'route' => 'reports.attendance', 'icon' => 'graph-up'],
-            ['name' => 'Dashboard', 'route' => 'accountant.dashboard', 'icon' => 'speedometer2'],
-            ['name' => 'Fee Collection', 'route' => 'accountant.fees', 'icon' => 'cash-stack'],
-            ['name' => 'Expenses', 'route' => 'accountant.expenses', 'icon' => 'receipt'],
-            ['name' => 'Reports', 'route' => 'accountant.reports', 'icon' => 'graph-up'],
+            ['name' => 'Reports', 'route' => 'fees.reports', 'icon' => 'graph-up'],
             
             // View Only Section
             ['name' => 'Holidays', 'route' => 'academic.holidays.index', 'icon' => 'calendar-event'],
@@ -118,7 +129,6 @@
             ['name' => 'Issue Book', 'route' => 'library.issues.create', 'icon' => 'plus-circle'],
             ['name' => 'Return Books', 'route' => 'library.issues.index', 'icon' => 'arrow-return-left'],
             ['name' => 'Students', 'route' => 'library.students', 'icon' => 'people'],
-            
             // View Only Section
             ['name' => 'Holidays', 'route' => 'academic.holidays.index', 'icon' => 'calendar-event'],
         ],

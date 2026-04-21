@@ -56,9 +56,9 @@ class ProgramController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:programs,name',
+            'name' => 'required|string|max:255|unique:standards,name',
             'short_name' => 'required|string|max:100',
-            'code' => 'required|string|max:20|unique:programs,code',
+            'code' => 'required|string|max:20|unique:standards,code',
             'department_id' => 'required|exists:departments,id',
             'duration_years' => 'required|integer|min:1|max:5',
             'total_semesters' => 'nullable|integer|min:1|max:10',
@@ -66,8 +66,7 @@ class ProgramController extends Controller
             'program_type' => 'required|in:undergraduate,postgraduate,diploma',
             'university_affiliation' => 'nullable|string|max:100',
             'university_program_code' => 'nullable|string|max:20',
-            'default_grade_scale_name' => 'required|string|max:100',
-            'is_active' => 'nullable|boolean'
+            'default_grade_scale_name' => 'required|string|max:100'
         ]);
 
         Program::create([
@@ -82,7 +81,7 @@ class ProgramController extends Controller
             'university_affiliation' => $validated['university_affiliation'],
             'university_program_code' => $validated['university_program_code'],
             'default_grade_scale_name' => $validated['default_grade_scale_name'],
-            'is_active' => $request->has('is_active')
+            'is_active' => $request->has('is_active') ? 1 : 0
         ]);
 
         return redirect()
@@ -114,17 +113,16 @@ class ProgramController extends Controller
     public function update(Request $request, Program $program): RedirectResponse
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:programs,name,' . $program->id,
+            'name' => 'required|string|max:255|unique:standards,name,' . $program->id,
             'short_name' => 'required|string|max:100',
-            'code' => 'required|string|max:20|unique:programs,code,' . $program->id,
+            'code' => 'required|string|max:20|unique:standards,code,' . $program->id,
             'department_id' => 'required|exists:departments,id',
             'duration_years' => 'required|integer|min:1|max:5',
             'total_semesters' => 'nullable|integer|min:1|max:10',
             'program_type' => 'required|in:undergraduate,postgraduate,diploma',
             'university_affiliation' => 'nullable|string|max:100',
             'university_program_code' => 'nullable|string|max:20',
-            'default_grade_scale_name' => 'required|string|max:100',
-            'is_active' => 'nullable|boolean'
+            'default_grade_scale_name' => 'required|string|max:100'
         ]);
 
         $program->update([
@@ -138,7 +136,7 @@ class ProgramController extends Controller
             'university_affiliation' => $validated['university_affiliation'],
             'university_program_code' => $validated['university_program_code'],
             'default_grade_scale_name' => $validated['default_grade_scale_name'],
-            'is_active' => $request->has('is_active')
+            'is_active' => $request->has('is_active') ? 1 : 0
         ]);
 
         return redirect()

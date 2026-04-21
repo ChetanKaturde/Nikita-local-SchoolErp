@@ -125,7 +125,7 @@ class AcademicRuleController extends Controller
     {
         $validated = $request->validate([
             'session_id' => 'nullable|exists:academic_sessions,id',
-            'program_id' => 'nullable|exists:programs,id',
+            'program_id' => 'nullable|exists:standards,id',
         ]);
 
         $rules = $this->ruleEngine->getRulesByCategory(
@@ -181,7 +181,7 @@ class AcademicRuleController extends Controller
         $validated = $request->validate([
             'value' => 'required',
             'session_id' => 'nullable|exists:academic_sessions,id',
-            'program_id' => 'nullable|exists:programs,id',
+            'program_id' => 'nullable|exists:standards,id',
             'department_id' => 'nullable|exists:departments,id',
             'is_override' => 'boolean',
             'override_reason' => 'nullable|string|max:500',

@@ -240,16 +240,22 @@ class Student extends Model implements Authenticatable
     public function getAttendancePercentageBySubject()
     {
         return $this->attendances()
-            ->select('subject_id', 
+            ->join('timetables', 'attendance.timetable_id', '=', 'timetables.id')
+            ->join('subjects', 'timetables.subject_id', '=', 'subjects.id')
+            ->select('timetables.subject_id', 'subjects.name as subject_name', 'subjects.code as subject_code',
                 \DB::raw('COUNT(*) as total'),
-                \DB::raw('SUM(CASE WHEN status = "present" THEN 1 ELSE 0 END) as present'),
-                \DB::raw('SUM(CASE WHEN status = "absent" THEN 1 ELSE 0 END) as absent')
+                \DB::raw('SUM(CASE WHEN attendance.status = "present" THEN 1 ELSE 0 END) as present'),
+                \DB::raw('SUM(CASE WHEN attendance.status = "absent" THEN 1 ELSE 0 END) as absent')
             )
-            ->groupBy('subject_id')
-            ->with('subject')
+            ->groupBy('timetables.subject_id', 'subjects.name', 'subjects.code')
             ->get()
             ->map(function($item) {
                 $item->percentage = $item->total > 0 ? round(($item->present / $item->total) * 100, 2) : 0;
+                // Create subject object
+                $item->subject = (object)[
+                    'name' => $item->subject_name,
+                    'code' => $item->subject_code,
+                ];
                 return $item;
             });
     }
@@ -430,11 +436,12 @@ public function scholarships()
     }
 
     /**
-     * Get student email from user relationship
+     * Get student email from the email column (not from user relationship)
+     * Note: The students table has an email column that stores the student's contact email
      */
     public function getEmailAttribute(): ?string
     {
-        return $this->user?->email;
+        return $this->attributes['email'] ?? null;
     }
 }
 

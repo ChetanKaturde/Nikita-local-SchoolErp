@@ -18,7 +18,7 @@ return new class extends Migration
                       ->constrained('timetables')->onDelete('cascade');
 
                 // Add index for better performance
-                $table->index(['timetable_id', 'date']);
+                $table->index(['timetable_id', 'attendance_date']);
             });
         }
     }
@@ -31,7 +31,7 @@ return new class extends Migration
         if (Schema::hasColumn('attendance', 'timetable_id')) {
             Schema::table('attendance', function (Blueprint $table) {
                 $table->dropForeign(['timetable_id']);
-                $table->dropIndex(['timetable_id', 'date']);
+                $table->dropIndex(['timetable_id', 'attendance_date']);
                 $table->dropColumn('timetable_id');
             });
         }

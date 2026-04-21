@@ -96,17 +96,17 @@ class DashboardController extends Controller
 
         // Get attendance for this month (regardless of who marked it)
         $totalMarked = Attendance::whereIn('student_id', $studentIds)
-            ->where('attendance_date', '>=', now()->startOfMonth())
+            ->whereDate('date', '>=', now()->startOfMonth())
             ->count();
 
         $presentCount = Attendance::whereIn('student_id', $studentIds)
             ->where('status', 'present')
-            ->where('attendance_date', '>=', now()->startOfMonth())
+            ->whereDate('date', '>=', now()->startOfMonth())
             ->count();
 
         $absentCount = Attendance::whereIn('student_id', $studentIds)
             ->where('status', 'absent')
-            ->where('attendance_date', '>=', now()->startOfMonth())
+            ->whereDate('date', '>=', now()->startOfMonth())
             ->count();
 
         $percentage = $totalMarked > 0 ? round(($presentCount / $totalMarked) * 100, 2) : 0;

@@ -224,6 +224,143 @@
                             @endforelse
                         </div>
                     </div>
+                    
+                    <!-- Fee Details Section -->
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><i class="bi bi-currency-dollar me-2"></i>Fee Details</h5>
+                        </div>
+                        <div class="card-body">
+                            @if($feeRecords->count() > 0)
+                                <!-- Fee Summary Cards -->
+                                <div class="row mb-4">
+                                    <div class="col-md-4">
+                                        <div class="card bg-primary text-white">
+                                            <div class="card-body text-center">
+                                                <h6 class="card-title">Total Fees</h6>
+                                                <h4 class="mb-0">₹{{ number_format($totalFees, 2) }}</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="card bg-success text-white">
+                                            <div class="card-body text-center">
+                                                <h6 class="card-title">Paid Amount</h6>
+                                                <h4 class="mb-0">₹{{ number_format($totalPaid, 2) }}</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="card bg-danger text-white">
+                                            <div class="card-body text-center">
+                                                <h6 class="card-title">Outstanding</h6>
+                                                <h4 class="mb-0">₹{{ number_format($totalOutstanding, 2) }}</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Fee Records Table -->
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-bordered">
+                                        <thead class="table-dark">
+                                            <tr>
+                                                <th>Fee Type</th>
+                                                <th>Total Amount</th>
+                                                <th>Discount</th>
+                                                <th>Final Amount</th>
+                                                <th>Paid Amount</th>
+                                                <th>Outstanding</th>
+                                                <th>Installments</th>
+                                                <th>Status</th>
+                                                <th>Payment History</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach($feeRecords as $fee)
+                                                <tr>
+                                                    <td><strong>{{ $fee->feeStructure->feeHead->name ?? 'N/A' }}</strong></td>
+                                                    <td>₹{{ number_format($fee->total_amount, 2) }}</td>
+                                                    <td>₹{{ number_format($fee->discount_amount, 2) }}</td>
+                                                    <td><strong>₹{{ number_format($fee->final_amount, 2) }}</strong></td>
+                                                    <td class="text-success">₹{{ number_format($fee->paid_amount, 2) }}</td>
+                                                    <td class="{{ $fee->outstanding_amount > 0 ? 'text-danger' : 'text-success' }}">
+                                                        <strong>₹{{ number_format($fee->outstanding_amount, 2) }}</strong>
+                                                    </td>
+                                                    <td>{{ $fee->feeStructure->installments ?? 1 }}</td>
+                                                    <td>
+                                                        @if($fee->status === 'paid')
+                                                            <span class="badge bg-success">Full Paid</span>
+                                                        @elseif($fee->status === 'partial')
+                                                            <span class="badge bg-warning">Partial</span>
+                                                        @else
+                                                            <span class="badge bg-danger">Unpaid</span>
+                                                        @endif
+                                                    </td>
+                                                    <td>
+                                                        @if($fee->payments && $fee->payments->count() > 0)
+                                                            <button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#paymentHistory{{ $fee->id }}">
+                                                                <i class="bi bi-receipt"></i> View ({{ $fee->payments->count() }})
+                                                            </button>
+                                                            
+                                                            <!-- Payment History Modal -->
+                                                            <div class="modal fade" id="paymentHistory{{ $fee->id }}" tabindex="-1">
+                                                                <div class="modal-dialog">
+                                                                    <div class="modal-content">
+                                                                        <div class="modal-header bg-info text-white">
+                                                                            <h5 class="modal-title">Payment History - {{ $fee->feeStructure->feeHead->name ?? 'Fee' }}</h5>
+                                                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                                        </div>
+                                                                        <div class="modal-body">
+                                                                            <table class="table table-sm">
+                                                                                <thead>
+                                                                                    <tr>
+                                                                                        <th>Receipt No.</th>
+                                                                                        <th>Installment</th>
+                                                                                        <th>Amount</th>
+                                                                                        <th>Date</th>
+                                                                                        <th>Mode</th>
+                                                                                        <th>Status</th>
+                                                                                    </tr>
+                                                                                </thead>
+                                                                                <tbody>
+                                                                                    @foreach($fee->payments as $payment)
+                                                                                    <tr>
+                                                                                        <td><strong>{{ $payment->receipt_number }}</strong></td>
+                                                                                        <td>{{ $payment->installment_number }}</td>
+                                                                                        <td>₹{{ number_format($payment->amount, 2) }}</td>
+                                                                                        <td>{{ $payment->payment_date->format('d M Y') }}</td>
+                                                                                        <td>{{ ucfirst($payment->payment_mode) }}</td>
+                                                                                        <td>
+                                                                                            <span class="badge bg-{{ $payment->status === 'success' ? 'success' : 'warning' }}">
+                                                                                                {{ ucfirst($payment->status) }}
+                                                                                            </span>
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                    @endforeach
+                                                                                </tbody>
+                                                                            </table>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        @else
+                                                            <span class="text-muted">No payments yet</span>
+                                                        @endif
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            @else
+                                <div class="text-center text-muted py-4">
+                                    <i class="bi bi-currency-dollar fs-1 text-muted"></i>
+                                    <p class="mt-2">No fee records found for this student.</p>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Photo & Documents -->

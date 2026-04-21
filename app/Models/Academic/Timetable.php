@@ -146,8 +146,8 @@ class Timetable extends Model
     public function getComputedStatusAttribute(): string
     {
         $today = now()->format('Y-m-d');
-        $yesterday = now()->subDay()->format('Y-m-d');
-        
+        $yesterday = now()->copy()->subDay()->format('Y-m-d');
+
         // If has a specific date, compute based on that date
         if (!empty($this->date)) {
             $timetableDate = $this->date instanceof \Carbon\Carbon 
@@ -190,57 +190,57 @@ class Timetable extends Model
 
     /**
      * Check if attendance can be marked
-     * 
+     *
      * Attendance can be marked when:
      * - Timetable date is today (for date-based timetables)
      * - Timetable day_of_week is today (for day-based timetables)
      * - Status is NOT closed
-     * 
+     *
      * @return bool
      */
     public function isActiveForAttendance(): bool
     {
-        // Get computed status (automatic based on date)
-        $computedStatus = $this->computed_status ?? $this->status;
-        
+        // Use status directly (computed_status is an accessor that may not exist)
+        $status = $this->status;
+
         // If status is closed, cannot mark attendance
-        if ($computedStatus === self::STATUS_CLOSED) {
+        if ($status === self::STATUS_CLOSED) {
             return false;
         }
-        
+
         // If has a specific date, check if date is today
         if (!empty($this->date)) {
-            $timetableDate = $this->date instanceof \Carbon\Carbon 
-                ? $this->date->format('Y-m-d') 
+            $timetableDate = $this->date instanceof \Carbon\Carbon
+                ? $this->date->format('Y-m-d')
                 : $this->date;
-            
+
             $today = now()->format('Y-m-d');
-            
+
             // If date is in the past, cannot mark attendance
             if ($timetableDate < $today) {
                 return false;
             }
-            
+
             // If date is in the future, cannot mark attendance
             if ($timetableDate > $today) {
                 return false;
             }
-            
+
             // Date is today - allow attendance
             return true;
         }
-        
+
         // If using day_of_week instead of specific date
         if (!empty($this->day_of_week)) {
             $today = strtolower(now()->format('l'));
             $timetableDay = strtolower($this->day_of_week);
-            
+
             // If today matches the day_of_week, allow attendance
             return $today === $timetableDay;
         }
-        
+
         // Fallback: allow if not closed (for timetables without date or day_of_week)
-        return $computedStatus !== self::STATUS_CLOSED;
+        return $status !== self::STATUS_CLOSED;
     }
 
     /**

@@ -13,21 +13,27 @@ class RolePermissionSeeder extends Seeder
         // Create basic roles
         $roles = [
             'principal' => 'Principal',
+            'admin' => 'Administrator',
             'hod_commerce' => 'HOD Commerce',
-            'hod_science' => 'HOD Science', 
+            'hod_science' => 'HOD Science',
             'hod_management' => 'HOD Management',
             'hod_arts' => 'HOD Arts',
             'class_teacher' => 'Class Teacher',
             'subject_teacher' => 'Subject Teacher',
+            'teacher' => 'Teacher',
+            'staff' => 'Staff',
             'lab_instructor' => 'Lab Instructor',
             'accounts_staff' => 'Accounts Staff',
+            'accountant' => 'Accountant',
             'admission_officer' => 'Admission Officer',
             'student' => 'Student',
             'parent' => 'Parent',
+            'office' => 'Office Staff',
+            'librarian' => 'Librarian',
         ];
 
         foreach ($roles as $name => $displayName) {
-            Role::create([
+            Role::firstOrCreate([
                 'name' => $name,
                 'guard_name' => 'web'
             ]);

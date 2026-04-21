@@ -169,7 +169,7 @@
                         @forelse($recentAttendance as $attendance)
                             <tr>
                                 <td>{{ $attendance->date->format('d M Y') }}</td>
-                                <td>{{ $attendance->subject->name ?? 'N/A' }}</td>
+                                <td>{{ $attendance->timetable->subject->name ?? 'N/A' }}</td>
                                 <td>
                                     <span class="badge bg-{{ $attendance->status === 'present' ? 'success' : ($attendance->status === 'absent' ? 'danger' : 'warning') }}">
                                         {{ ucfirst($attendance->status) }}

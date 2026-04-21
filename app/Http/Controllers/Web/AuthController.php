@@ -34,7 +34,9 @@ class AuthController extends Controller
                 'teacher' => 'teacher.dashboard',
                 'class_teacher' => 'teacher.dashboard',
                 'subject_teacher' => 'teacher.dashboard',
+                'staff' => 'staff.dashboard',
                 'student' => 'dashboard.student',
+                'accountant' => 'dashboard.accountant',
                 'accounts_staff' => 'dashboard.accounts_staff',
                 'office' => 'dashboard.office',
                 'librarian' => 'dashboard.librarian',
@@ -44,14 +46,14 @@ class AuthController extends Controller
                 'hod_arts' => 'teacher.dashboard',
             ];
 
-            $route = $redirectRoutes[$role] ?? 'dashboard.student';
+            $route = $redirectRoutes[$role] ?? 'dashboard.accountant';
 
             return redirect()->route($route);
         }
 
         return back()->withErrors([
             'email' => 'The provided credentials do not match our records.',
-        ]);
+        ])->withInput($request->only('email'));
     }
 
     public function logout(Request $request)

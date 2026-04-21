@@ -3,13 +3,17 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Models\User\Student;
 use App\Models\Academic\Program;
 use App\Models\Academic\Division;
 use App\Models\Academic\AcademicSession;
+use App\Helpers\PasswordHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Spatie\Permission\Models\Role;
 
 class StudentController extends Controller
 {
@@ -18,7 +22,7 @@ class StudentController extends Controller
         $perPage = $request->input('per_page', 20);
         $perPage = in_array($perPage, [10, 15, 20, 25, 50]) ? (int) $perPage : 20;
 
-        $query = Student::with(['program', 'division', 'academicSession']);
+        $query = Student::with(['program', 'division', 'academicSession', 'user', 'fees']);
 
         if ($request->filled('program_id')) {
             $query->where('program_id', $request->program_id);
@@ -56,8 +60,20 @@ class StudentController extends Controller
 
     public function show(Student $student)
     {
+        // Load student with related data including fees
         $student->load(['program', 'division', 'academicSession', 'guardians']);
-        return view('dashboard.students.show', compact('student'));
+        
+        // Load fee details
+        $feeRecords = \App\Models\Fee\StudentFee::where('student_id', $student->id)
+            ->with(['feeStructure.feeHead', 'payments'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+        
+        $totalFees = $feeRecords->sum('final_amount');
+        $totalPaid = $feeRecords->sum('paid_amount');
+        $totalOutstanding = $feeRecords->sum('outstanding_amount');
+        
+        return view('dashboard.students.show', compact('student', 'feeRecords', 'totalFees', 'totalPaid', 'totalOutstanding'));
     }
 
     public function create()
@@ -74,16 +90,17 @@ class StudentController extends Controller
             'first_name'           => ['required','string','max:100','regex:/^[a-zA-Z\s]+$/'],
             'middle_name'          => ['nullable','string','max:100','regex:/^[a-zA-Z\s]+$/'],
             'last_name'            => ['required','string','max:100','regex:/^[a-zA-Z\s]+$/'],
-            'date_of_birth'        => 'required|date|before:today',
+            'date_of_birth'        => 'required|date|before:today|after:1990-01-01',
             'gender'               => 'required|in:male,female,other',
             'blood_group'          => ['nullable','regex:/^(A|B|AB|O)[+-]$/'],
             'religion'             => 'nullable|string|max:50',
             'category'             => 'required|in:general,obc,sc,st,vjnt,nt,ews',
-            'mobile_number'        => 'nullable|regex:/^[0-9\+\s\-]+$/|max:15',
-            'email'                => 'nullable|email|max:255|unique:students,email',
-            'current_address'      => 'nullable|string|max:500',
-            'permanent_address'    => 'nullable|string|max:500',
-            'program_id'           => 'required|exists:programs,id',
+            'aadhar_number'        => 'nullable|digits:12',
+            'mobile_number'        => 'required|regex:/^[6-9]\d{9}$/',
+            'email'                => 'required|email|max:255|unique:students,email',
+            'current_address'      => 'required|string|min:10|max:500',
+            'permanent_address'    => 'nullable|string|min:10|max:500',
+            'program_id'           => 'required|exists:standards,id',
             'division_id'          => 'required|exists:divisions,id',
             'academic_session_id'  => 'required|exists:academic_sessions,id,is_active,1',
             'academic_year'        => 'required|string|max:20',
@@ -104,7 +121,26 @@ class StudentController extends Controller
         $validated['roll_number']           = $numbers['roll_number'];
         $validated['prn']                   = null;
         $validated['university_seat_number'] = null;
-        $validated['user_id']               = auth()->id();
+
+        // Generate password for student
+        $generatedPassword = PasswordHelper::generate(10);
+        $hashedPassword = Hash::make($generatedPassword);
+
+        // Create user account for student with generated password FIRST
+        $studentEmail = $request->input('email') ?? strtolower($validated['first_name'] . '.' . $validated['last_name'] . '@student.schoolerp.com');
+        
+        $user = User::create([
+            'name' => $validated['first_name'] . ' ' . $validated['last_name'],
+            'email' => $studentEmail,
+            'password' => $hashedPassword,
+            'temp_password' => $generatedPassword,
+            'password_generated_at' => now(),
+            'email_verified_at' => now(),
+            'role' => 'student',
+        ]);
+        
+        // Remove user_id from validated data and set proper user_id
+        $validated['user_id'] = $user->id;
 
         if ($request->hasFile('photo')) {
             $validated['photo_path'] = $request->file('photo')->store('uploads/students/photos', 'public');
@@ -128,11 +164,13 @@ class StudentController extends Controller
             $validated['domicile_certificate_path'] = $request->file('domicile_certificate')->store('uploads/students/documents', 'public');
         }
 
+        // Create student with user_id already set
         $student = Student::create($validated);
 
         return redirect()
             ->route('dashboard.students.show', $student)
-            ->with('success', 'Student created successfully with Admission No: ' . $validated['admission_number']);
+            ->with('success', 'Student created successfully with Admission No: ' . $validated['admission_number'])
+            ->with('password', $generatedPassword);
     }
 
     public function edit(Student $student)
@@ -158,7 +196,7 @@ class StudentController extends Controller
             'email'                   => 'nullable|email|max:255|unique:students,email,' . $student->id,
             'current_address'         => 'nullable|string|max:500',
             'permanent_address'       => 'nullable|string|max:500',
-            'program_id'              => 'required|exists:programs,id',
+            'program_id'              => 'required|exists:standards,id',
             'division_id'             => 'required|exists:divisions,id',
             'academic_session_id'     => 'required|exists:academic_sessions,id,is_active,1',
             'academic_year'           => 'required|string|max:20',
@@ -224,6 +262,15 @@ class StudentController extends Controller
         $validated['user_id']          = $student->user_id;
 
         $student->update($validated);
+
+        // Also update the user's email if it was changed AND the new email is unique in users table
+        if ($student->user && isset($validated['email']) && $validated['email'] !== $student->user->email) {
+            // Check if email already exists for another user
+            $existingUser = User::where('email', $validated['email'])->where('id', '!=', $student->user->id)->first();
+            if (!$existingUser) {
+                $student->user->update(['email' => $validated['email']]);
+            }
+        }
 
         return redirect()
             ->route('dashboard.students.show', $student)

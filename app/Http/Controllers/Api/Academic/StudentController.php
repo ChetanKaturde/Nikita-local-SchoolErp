@@ -165,7 +165,7 @@ class StudentController extends Controller
             'gender' => 'required|in:male,female,other',    // Only these values allowed
             'mobile_number' => 'nullable|string|max:15',    // Optional phone number
             'email' => 'nullable|email|unique:students,email', // Must be unique if provided
-            'program_id' => 'required|exists:programs,id',  // Must exist in programs table
+            'program_id' => 'required|exists:standards,id',  // Must exist in programs table
             'academic_year' => 'required|string|max:20',    // FY, SY, TY
             'division_id' => 'required|exists:divisions,id', // Must exist in divisions table
             'academic_session_id' => 'required|exists:academic_sessions,id,is_active,1', // Must exist

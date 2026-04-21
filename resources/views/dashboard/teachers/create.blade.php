@@ -47,16 +47,28 @@
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="password" class="form-label">Password <span class="text-danger">*</span></label>
-                                <input type="password" class="form-control @error('password') is-invalid @enderror" 
-                                       id="password" name="password" required>
+                                <div class="input-group">
+                                    <input type="password" class="form-control @error('password') is-invalid @enderror"
+                                           id="password" name="password" required minlength="8">
+                                    <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('password', 'togglePasswordIcon')">
+                                        <i class="bi bi-eye" id="togglePasswordIcon"></i>
+                                    </button>
+                                </div>
+                                <small class="text-muted">Minimum 8 characters</small>
                                 @error('password')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="password_confirmation" class="form-label">Confirm Password <span class="text-danger">*</span></label>
-                                <input type="password" class="form-control" 
-                                       id="password_confirmation" name="password_confirmation" required>
+                                <div class="input-group">
+                                    <input type="password" class="form-control"
+                                           id="password_confirmation" name="password_confirmation" required minlength="8">
+                                    <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('password_confirmation', 'toggleConfirmPasswordIcon')">
+                                        <i class="bi bi-eye" id="toggleConfirmPasswordIcon"></i>
+                                    </button>
+                                </div>
+                                <small class="text-muted">Re-enter your password</small>
                             </div>
                         </div>
 
@@ -74,4 +86,23 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+function togglePassword(inputId, iconId) {
+    const input = document.getElementById(inputId);
+    const icon = document.getElementById(iconId);
+    
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('bi-eye');
+        icon.classList.add('bi-eye-slash');
+    } else {
+        input.type = 'password';
+        icon.classList.remove('bi-eye-slash');
+        icon.classList.add('bi-eye');
+    }
+}
+</script>
+@endpush
 @endsection

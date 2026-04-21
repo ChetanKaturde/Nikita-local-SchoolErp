@@ -186,7 +186,7 @@ class StudentImportService
             'category' => 'required|in:general,obc,sc,st,vjnt,nt,ews,sbc',
             'mobile_number' => 'nullable|regex:/^[6-9]\d{9}$/',
             'email' => 'nullable|email',
-            'program_id' => 'required|exists:programs,id',
+            'program_id' => 'required|exists:standards,id',
             'division_id' => 'required|exists:divisions,id',
             'academic_session_id' => 'required|exists:academic_sessions,id,is_active,1',
             'academic_year' => 'required|string|max:20',

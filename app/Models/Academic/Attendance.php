@@ -39,32 +39,24 @@ class Attendance extends Model
     protected $table = 'attendance';
 
     /**
-     * Map 'date' attribute to 'attendance_date' column
+     * Map 'date' attribute to 'date' column (no mapping needed)
      */
     protected function casts(): array
     {
         return [
-            'attendance_date' => 'date',
+            'date' => 'date',
             'check_in_time' => 'datetime:H:i:s',
             'check_out_time' => 'datetime:H:i:s',
         ];
     }
 
     /**
-     * Accessor: Map 'date' to 'attendance_date'
+     * Remove date accessor - column is already named 'date'
      */
-    public function getDateAttribute()
-    {
-        return $this->attendance_date;
-    }
 
     /**
-     * Mutator: Map 'date' to 'attendance_date'
+     * Remove date mutator - column is already named 'date'
      */
-    public function setDateAttribute($value)
-    {
-        $this->attributes['attendance_date'] = $value;
-    }
 
     /**
      * Status constants
@@ -81,7 +73,7 @@ class Attendance extends Model
         'division_id',
         'academic_session_id',
         'timetable_id',
-        'attendance_date',
+        'date',
         'check_in_time',
         'check_out_time',
         'status',
@@ -132,6 +124,14 @@ class Attendance extends Model
     }
 
     /**
+     * Get the subject for this attendance (via timetable).
+     */
+    public function getSubjectAttribute()
+    {
+        return $this->timetable ? $this->timetable->subject : null;
+    }
+
+    /**
      * Get the teacher who marked this attendance.
      */
     public function markedBy(): BelongsTo
@@ -144,7 +144,7 @@ class Attendance extends Model
      */
     public function scopeByDate($query, $date)
     {
-        return $query->whereDate('attendance_date', $date);
+        return $query->whereDate('date', $date);
     }
 
     /**

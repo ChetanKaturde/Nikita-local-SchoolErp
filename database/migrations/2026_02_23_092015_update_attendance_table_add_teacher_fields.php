@@ -10,10 +10,14 @@ return new class extends Migration
     {
         Schema::table('attendance', function (Blueprint $table) {
             // Add unique constraint to prevent duplicate attendance for same student & date
-            $table->unique(['student_id', 'date', 'division_id'], 'att_student_date_div_unique');
+            if (!collect(\Illuminate\Support\Facades\DB::select("SHOW INDEX FROM attendance WHERE Key_name = 'att_student_date_div_unique'"))->first()) {
+                $table->unique(['student_id', 'attendance_date'], 'att_student_date_div_unique');
+            }
 
-            // Add index for faster queries (only on existing columns)
-            $table->index(['date'], 'att_date_idx');
+            // Add index for faster queries
+            if (!collect(\Illuminate\Support\Facades\DB::select("SHOW INDEX FROM attendance WHERE Key_name = 'att_date_idx'"))->first()) {
+                $table->index(['attendance_date'], 'att_date_idx');
+            }
         });
     }
 
